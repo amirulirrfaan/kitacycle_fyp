@@ -6,7 +6,7 @@ import Colors from "../constants/Colors";
 
 const SuccessScheduleScreen = ({ navigation }) => {
   const handleTrackRequest = () => {
-    navigation.navigate("TrackRequest");
+    navigation.navigate("Track Driver");
   };
 
   const handleDone = () => {

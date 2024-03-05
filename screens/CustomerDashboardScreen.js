@@ -1,18 +1,42 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
-import Colors from "../constants/Colors";
+import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import BalanceCard from "../components/Dashboard/BalanceCard";
 import CircleSlider from "../components/Dashboard/CircleSlider";
 import NewsSlider from "../components/Dashboard/NewsSlider";
+import { useEffect } from "react";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function CustomerDashboardScreen({ navigation }) {
+  const [userData, setUserData] = useState({});
+
+  async function getUserData() {
+    const token = await AsyncStorage.getItem("token");
+    axios
+      .post("http://10.207.201.212:3000/userdata", { token: token })
+      .then((res) => {
+        console.log(res.data);
+        setUserData(res.data.data);
+      });
+  }
+
+  function handleLogout() {
+    AsyncStorage.setItem("isLoggedIn", "");
+    AsyncStorage.setItem("token", "");
+    navigation.navigate("Login");
+  }
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Greeting */}
       <View style={styles.greetingContainer}>
-        <Text style={styles.greetingUserText}>Hi User!</Text>
+        <Text style={styles.greetingUserText}>Hi {userData.name}!</Text>
         <Text style={styles.greetingText}>Let's clean our environment</Text>
       </View>
 
@@ -39,6 +63,8 @@ function CustomerDashboardScreen({ navigation }) {
         title="Schedule Pickup"
         onPress={() => navigation.navigate("Schedule")}
       />
+
+      <PrimaryButton title="Logout" onPress={handleLogout} />
     </View>
   );
 }
