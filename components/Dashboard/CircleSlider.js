@@ -5,9 +5,10 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
+import { FontAwesome } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 function CircleSlider() {
   const navigation = useNavigation();
@@ -29,14 +30,6 @@ function CircleSlider() {
         <Text style={styles.circleText}>Recycle Center Locator</Text>
       </View>
 
-      {/* Rewards */}
-      <View style={styles.circleContainer}>
-        <View style={styles.circle}>
-          <FontAwesome name="trophy" size={24} color="white" />
-        </View>
-        <Text style={styles.circleText}>Rewards</Text>
-      </View>
-
       {/* Recycle Item */}
       <TouchableOpacity
         onPress={() => navigateToScreen("Recycle Item Price")}
@@ -51,9 +44,9 @@ function CircleSlider() {
       {/* Sorting Guidelines */}
       <View style={styles.circleContainer}>
         <View style={styles.circle}>
-          <FontAwesome name="recycle" size={24} color="white" />
+          <MaterialIcons name="lightbulb-outline" size={24} color="white" />
         </View>
-        <Text style={styles.circleText}>Waste Sorting Guidelines</Text>
+        <Text style={styles.circleText}>Learn</Text>
       </View>
     </ScrollView>
   );

@@ -18,25 +18,25 @@ const data = [
     id: 1,
     itemName: "Plastic",
     pricePerKg: 2.5,
-    image: require("../assets/RecycleItems/plastic.png"),
+    image: require("../assets/images/RecycleItems/plastic.png"),
   },
   {
     id: 2,
     itemName: "Paper",
     pricePerKg: 1.8,
-    image: require("../assets/RecycleItems/paper.png"),
+    image: require("../assets/images/RecycleItems/paper.png"),
   },
   {
     id: 3,
     itemName: "Glass ",
     pricePerKg: 3.0,
-    image: require("../assets/RecycleItems/glass.png"),
+    image: require("../assets/images/RecycleItems/glass.png"),
   },
   {
     id: 4,
     itemName: "Can ",
     pricePerKg: 3.0,
-    image: require("../assets/RecycleItems/can.png"),
+    image: require("../assets/images/RecycleItems/can.png"),
   },
 ];
 

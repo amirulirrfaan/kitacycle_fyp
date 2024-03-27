@@ -10,14 +10,14 @@ const SuccessScheduleScreen = ({ navigation }) => {
   };
 
   const handleDone = () => {
-    navigation.navigate("Dashboard");
+    navigation.navigate("Tabs");
   };
 
   return (
     <View style={styles.container}>
       {/* Success Animation */}
       <LottieView
-        source={require("../assets/successAnimation.json")}
+        source={require("../assets/animations/successAnimation.json")}
         autoPlay
         loop={false}
         style={styles.animation}
