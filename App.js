@@ -14,6 +14,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileScreen from "./screens/ProfileScreen";
+import RecycleCenterLocatorScreen from "./screens/RecycleCenterLocatorScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -118,6 +119,10 @@ export default function App() {
           />
           <Stack.Screen name="Pickup" component={ScheduleScreen} />
           <Stack.Screen name="Success" component={SuccessScheduleScreen} />
+          <Stack.Screen
+            name="Nearest Center"
+            component={RecycleCenterLocatorScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

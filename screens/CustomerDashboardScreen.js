@@ -52,7 +52,10 @@ function CustomerDashboardScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Nearest Center")}
+          >
             <View style={styles.buttonContent}>
               <MaterialIcons
                 style={styles.icon}
