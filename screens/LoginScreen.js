@@ -6,12 +6,37 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
+import { useLogin } from "../context/LoginProvider";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ navigation }) {
-  handleLoginPress = () => {
-    navigation.navigate("Dashboard");
+  const { setIsLoggedIn } = useLogin();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  handleLoginPress = async () => {
+    try {
+      const res = await axios.post("http://localhost:8000/login", {
+        email,
+        password,
+      });
+
+      if (res.data.success) {
+        AsyncStorage.setItem("token", res.data.token);
+        AsyncStorage.setItem("isLoggedIn", JSON.stringify(true));
+        setIsLoggedIn(true);
+      } else {
+        alert(res.data.message);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      Alert.alert("Login Failed", "An error occurred during login.");
+    }
   };
 
   return (
@@ -25,12 +50,29 @@ function LoginScreen({ navigation }) {
 
         <Text style={styles.title}>Login</Text>
 
-        <TextInput style={styles.input} placeholder="Email" />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          autoCapitalize="none"
+        />
 
-        <TextInput style={styles.input} placeholder="Password" />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          autoCapitalize="none"
+        />
 
         <TouchableOpacity>
-          <Text style={styles.forgotPasswordLink}>Forgot Password?</Text>
+          <Text
+            style={styles.forgotPasswordLink}
+            onPress={() => navigation.navigate("ForgotPassword")}
+          >
+            Forgot Password?
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity>

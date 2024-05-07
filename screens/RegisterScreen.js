@@ -6,32 +6,83 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import axios from "axios";
+import { useLogin } from "../context/LoginProvider";
 
 function RegisterScreen({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setconfirmPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const { setIsLoggedIn } = useLogin();
 
-  const handleRegisterPress = () => {
-    const userData = {
-      name,
-      email,
-      password,
-      phoneNumber,
-    };
-    axios
-      .post("http://10.207.201.212:3000/register", userData)
-      .then((res) => {
-        console.log(res.data);
-        navigation.navigate("Login");
-      })
-      .catch((err) => {
-        console.log(err);
+  const validateEmail = (email) => {
+    // Basic email validation
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  const validatePassword = (password) => {
+    // Password validation - at least 6 characters
+    return password.length >= 6;
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    // Basic phone number validation - optional, adjust as per your requirements
+    return phoneNumber.length >= 10;
+  };
+
+  const handleRegisterPress = async () => {
+    // Perform frontend validation
+    if (!name || !email || !password || !confirmPassword || !phoneNumber) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Please enter a valid email address.");
+      return;
+    }
+    if (!validatePassword(password)) {
+      Alert.alert(" Error", "Password must be at least 6 characters long.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert(" Error", "Passwords do not match.");
+      return;
+    }
+    if (!validatePhoneNumber(phoneNumber)) {
+      Alert.alert(
+        " Error",
+        "Please enter a valid phone number (at least 10 digits)."
+      );
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:8000/register", {
+        name,
+        email,
+        password,
+        confirmPassword,
+        phoneNumber,
       });
+
+      if (res.data.success) {
+        Alert.alert("Registration Successful");
+        navigation.navigate("Login");
+      } else {
+        alert(res.data.message);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      Alert.alert(
+        "Registration Failed",
+        "An error occurred during registration."
+      );
+    }
   };
 
   return (
@@ -44,12 +95,14 @@ function RegisterScreen({ navigation }) {
           placeholder="Name"
           value={name}
           onChangeText={setName}
+          autoCapitalize="none"
         />
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
         />
         <TextInput
           style={styles.input}
@@ -57,6 +110,15 @@ function RegisterScreen({ navigation }) {
           secureTextEntry={true}
           value={password}
           onChangeText={setPassword}
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry={true}
+          value={confirmPassword}
+          onChangeText={setconfirmPassword}
+          autoCapitalize="none"
         />
         <TextInput
           style={styles.input}
@@ -64,6 +126,7 @@ function RegisterScreen({ navigation }) {
           keyboardType="phone-pad"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
+          autoCapitalize="none"
         />
       </View>
       <PrimaryButton title="Register" onPress={handleRegisterPress} />

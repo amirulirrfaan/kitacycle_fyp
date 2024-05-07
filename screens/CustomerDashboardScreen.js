@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import BalanceCard from "../components/Dashboard/BalanceCard";
 import Colors from "../constants/Colors";
@@ -13,11 +14,43 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 function CustomerDashboardScreen() {
   const navigation = useNavigation();
+  const [name, setName] = useState("");
+  const [points, setPoints] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function getUserData() {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post("http://localhost:8000/getUserData", {
+      token,
+    });
+    console.log("Response from server:", response.data);
+    setName(response.data.data.name);
+    setPoints(response.data.data.points);
+  }
+
+  //pull to refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getUserData();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <LinearGradient
         colors={[Colors.gradientOne, Colors.gradientTwo]}
         style={styles.header}
@@ -28,12 +61,12 @@ function CustomerDashboardScreen() {
       <View style={styles.container}>
         {/* Greeting */}
         <View style={styles.greetingContainer}>
-          <Text style={styles.greetingUserText}>Hi Irfan!</Text>
+          <Text style={styles.greetingUserText}>Hi {name}!</Text>
           <Text style={styles.greetingText}>Let's clean our environment</Text>
         </View>
 
         {/* Current Balance Card */}
-        <BalanceCard />
+        <BalanceCard points={points} />
 
         {/* Button */}
         <View style={styles.buttonContainer}>

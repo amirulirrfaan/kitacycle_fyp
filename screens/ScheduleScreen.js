@@ -1,41 +1,134 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
-import Colors from "../constants/Colors";
 import DatePicker from "../components/Schedule/DatePicker";
 import TimePicker from "../components/Schedule/TimeInput";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import GOOGLE_API_KEY from "../google_api_key";
 
 const ScheduleScreen = ({ navigation }) => {
-  // State for input fields
+  const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [weight, setWeight] = useState("");
+  const [error, setError] = useState("");
 
-  // Handler for scheduling pickup
-  const handleSchedule = () => {
-    // Log scheduled pickup details
-    console.log("Location:", location);
-    console.log("Date:", date);
-    console.log("Time:", time);
-    console.log("Weight:", weight);
+  useEffect(() => {
+    getUserData();
+  }, []);
 
-    // Navigate to success screen
-    navigation.navigate("Success");
+  async function getUserData() {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post("http://localhost:8000/getUserData", {
+      token,
+    });
+    setName(response.data.data.name);
+  }
+
+  // Validation function
+  const validateInputs = () => {
+    if (!location.trim()) {
+      setError("Please enter pickup address.");
+      return false;
+    }
+    if (!date) {
+      setError("Please select a date.");
+      return false;
+    }
+    if (!time) {
+      setError("Please select a time.");
+      return false;
+    }
+    if (!weight.trim()) {
+      setError("Please enter approximate waste weight.");
+      return false;
+    }
+    if (isNaN(weight) || parseFloat(weight) <= 0) {
+      setError("Please enter a valid weight (greater than 0).");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
+  const handleSchedule = async () => {
+    if (validateInputs()) {
+      try {
+        // const response = await axios.post(
+        //   "http://localhost:8000/createPickup",
+        //   {
+        //     name,
+        //     location,
+        //     date,
+        //     time,
+        //     weight,
+        //   }
+        // );
+        // console.log(response.data);
+        navigation.navigate("Success");
+      } catch (error) {
+        console.error("Error scheduling pickup:", error);
+      }
+    }
+  };
+
+  // Function to perform geocoding
+  const geocodeLocation = async (address) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address
+        )}&key=${GOOGLE_API_KEY}`
+      );
+      if (response.data.results.length > 0) {
+        const { lat, lng } = response.data.results[0].geometry.location;
+        setLatitude(lat);
+        setLongitude(lng);
+        console.log(lat);
+        console.log(lng);
+      } else {
+        setError("Could not find coordinates for the selected address.");
+      }
+    } catch (error) {
+      console.error("Error geocoding address:", error);
+      setError("Error geocoding address. Please try again.");
+    }
+  };
+  const handlePlaceSelect = (data, details = null) => {
+    setLocation(data.description);
+    geocodeLocation(data.description);
   };
 
   return (
     <View style={styles.container}>
       {/* Pickup Address Input */}
-      <View style={styles.labelContainer}>
-        <Text style={styles.label}>Pickup Address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Pickup Address"
-          value={location}
-          onChangeText={(text) => setLocation(text)}
-        />
-      </View>
+      <Text style={styles.label}>Pickup Address</Text>
+
+      <GooglePlacesAutocomplete
+        placeholder="Search"
+        onPress={handlePlaceSelect}
+        query={{
+          key: GOOGLE_API_KEY,
+          language: "en",
+        }}
+        styles={{
+          container: {
+            flex: 0,
+          },
+          listView: {
+            backgroundColor: "#ffffff",
+            borderRadius: 8,
+          },
+          poweredContainer: {
+            display: "none",
+          },
+        }}
+      />
 
       {/* Date and Time Inputs */}
       <View style={styles.row}>
@@ -72,6 +165,9 @@ const ScheduleScreen = ({ navigation }) => {
         />
       </View>
 
+      {/* Display validation error message */}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
       {/* Schedule Button */}
       <View style={styles.buttonContainer}>
         <PrimaryButton title="Confirm Schedule" onPress={handleSchedule} />
@@ -81,6 +177,10 @@ const ScheduleScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  error: {
+    color: "red",
+    marginBottom: 10,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 20,

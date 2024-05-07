@@ -1,10 +1,40 @@
-import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { React, useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Colors from "../constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLogin } from "../context/LoginProvider";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
+  const { setIsLoggedIn } = useLogin();
+  const [name, setName] = useState("");
+
+  async function getUserData() {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post("http://localhost:8000/getUserData", {
+      token,
+    });
+    setName(response.data.data.name);
+  }
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    // Clear authentication state
+    await AsyncStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
@@ -13,34 +43,37 @@ const ProfileScreen = () => {
           style={styles.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0.5 }}
-        ></LinearGradient>
-        <View style={styles.profileImageContainer}>
-          <Image
-            source={require("../assets/images/uncleRoger.png")}
-            style={styles.profileImage}
-          />
-        </View>
-        <Text style={styles.name}>John Doe</Text>
-        <Text style={styles.phoneNumber}>123-456-7890</Text>
+        >
+          <View style={styles.profileContent}>
+            <View style={styles.profileImageContainer}>
+              <Image
+                source={require("../assets/images/uncleRoger.png")}
+                style={styles.profileImage}
+              />
+            </View>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.phoneNumber}>123-456-7890</Text>
+          </View>
+        </LinearGradient>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <OptionItem icon="star" text="Points and Rewards" />
-        <OptionItem icon="bell" text="Notifications" />
-        <OptionItem icon="user" text="My Profile" />
-        <OptionItem icon="lock" text="Change Password" />
-        <OptionItem icon="sign-out" text="Logout" />
+        <OptionItem onPress={"te"} icon="clock-o" text="Pickup History" />
+        <OptionItem onPress={"te"} icon="bell" text="Notifications" />
+        <OptionItem onPress={"te"} icon="user" text="My Profile" />
+        <OptionItem onPress={"te"} icon="lock" text="Change Password" />
+        <OptionItem onPress={handleLogout} icon="sign-out" text="Logout" />
       </ScrollView>
     </View>
   );
 };
 
-const OptionItem = ({ icon, text }) => {
+const OptionItem = ({ icon, text, onPress }) => {
   return (
-    <View style={styles.optionContainer}>
+    <TouchableOpacity onPress={onPress} style={styles.optionContainer}>
       <Icon name={icon} size={20} style={styles.icon} />
       <Text style={styles.optionText}>{text}</Text>
       <Icon name="chevron-right" size={20} style={styles.arrowIcon} />
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -49,16 +82,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
+    flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
   },
   header: {
-    height: "50%",
-    position: "absolute",
-    width: "100%",
-    backgroundColor: Colors.primary,
+    flex: 1,
+  },
+  profileContent: {
+    alignItems: "center",
+    paddingVertical: 20,
   },
   profileImageContainer: {
     borderWidth: 5,
@@ -74,11 +107,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 18,
     fontWeight: "bold",
+    color: "white",
   },
   phoneNumber: {
     marginTop: 5,
     fontSize: 16,
-    color: "rgba(0,0,0,0.5)",
+    color: "white",
   },
   scrollContainer: {
     flexGrow: 1,

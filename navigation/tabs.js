@@ -8,6 +8,7 @@ import Colors from "../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileScreen from "../screens/ProfileScreen";
 import RewardsScreen from "../screens/RewardsScreen";
+import RecycleItemPriceScreen from "../screens/RecycleItemPriceScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -20,6 +21,7 @@ const Tabs = () => {
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.grey,
+        headerShown: false,
       }}
     >
       <Tab.Screen
@@ -38,7 +40,7 @@ const Tabs = () => {
       />
       <Tab.Screen
         name="Learn"
-        component={ScheduleScreen}
+        component={RecycleItemPriceScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) => (

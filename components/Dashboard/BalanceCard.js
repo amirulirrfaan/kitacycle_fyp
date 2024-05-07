@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, StyleSheet, ImageBackground } from "react-native";
 import Colors from "../../constants/Colors";
 
-function BalanceCard() {
-  const points = 1000;
-
+function BalanceCard(props) {
+  const { points } = props;
+  console.log("Points:", points);
   return (
     <View style={styles.card}>
       <View style={styles.textContainer}>

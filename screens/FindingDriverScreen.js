@@ -1,24 +1,13 @@
 import { View, StyleSheet, Image, Text, FlatList } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as Location from "expo-location";
-import { markers } from "../assets/markers";
-import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
-const RecycleCenterLocatorScreen = () => {
+const FindingDriverScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [initialRegion, setInitialRegion] = useState(null);
-  const snapPoints = useMemo(() => ["25%", "50%", "70%"], []);
-  const bottomSheetRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -61,41 +50,12 @@ const RecycleCenterLocatorScreen = () => {
         initialRegion={initialRegion}
         showsUserLocation={true}
         showsMyLocationButton={true}
-      >
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinate={marker.coordinate}
-            title={marker.title}
-            description={marker.description}
-            distance={marker.distance + "km"}
-          >
-            <Image
-              source={require("../assets/images/recyclingCenter.png")}
-              style={{ width: 40, height: 40 }}
-            />
-          </Marker>
-        ))}
-      </MapView>
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={0}
-        snapPoints={snapPoints}
-        backgroundComponent={({ style }) => (
-          <View style={[style, styles.bottomSheetBackground]} />
-        )}
-      >
-        <FlatList
-          data={markers}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-        />
-      </BottomSheet>
+      ></MapView>
     </GestureHandlerRootView>
   );
 };
 
-export default RecycleCenterLocatorScreen;
+export default FindingDriverScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -131,5 +91,53 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontWeight: "bold",
+  },
+  bottomSheetContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+  },
+  driverInfoContainer: {
+    marginBottom: 20,
+  },
+  driverInfoTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  driverDetails: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  driverAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  driverTextContainer: {
+    flex: 1,
+  },
+  driverName: {
+    fontSize: 16,
+  },
+  etaContainer: {
+    marginBottom: 20,
+  },
+  etaTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  etaTime: {
+    fontSize: 16,
+  },
+  additionalInfoContainer: {},
+  additionalInfoTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  additionalInfoText: {
+    fontSize: 16,
   },
 });

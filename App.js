@@ -1,134 +1,46 @@
-import { StyleSheet, View, SafeAreaView } from "react-native";
-
+import React, { useEffect } from "react";
+import { StyleSheet, SafeAreaView } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoginProvider, { useLogin } from "./context/LoginProvider";
+import MainNavigator from "./navigation/mainNavigator";
 
-import Tabs from "./navigation/tabs";
-import CustomerDashboardScreen from "./screens/CustomerDashboardScreen";
-import RecycleItemPriceScreen from "./screens/RecycleItemPriceScreen";
-import SuccessScheduleScreen from "./screens/SuccessScheduleScreen";
-import ScheduleScreen from "./screens/ScheduleScreen";
-import Colors from "./constants/Colors";
-import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
-import ProfileScreen from "./screens/ProfileScreen";
-import RecycleCenterLocatorScreen from "./screens/RecycleCenterLocatorScreen";
+const InitializeLoginStatus = () => {
+  const { setIsLoggedIn } = useLogin();
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+  useEffect(() => {
+    // Check if the user is logged in
+    const checkLoggedIn = async () => {
+      try {
+        const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+        if (isLoggedIn) {
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+      }
+    };
 
-function TabNavigator() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarStyle: {
-          backgroundColor: "#fff",
-        },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.grey,
-      }}
-    >
-      <Tab.Screen
-        name="HomeScreen"
-        component={StackNavigator}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <AntDesign
-              name="home"
-              size={24}
-              color={focused ? Colors.primary : Colors.grey}
-            />
-          ),
-          headerShown: false,
-        }}
-      />
-      <Tab.Screen
-        name="Learn"
-        component={ScheduleScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="bulb-outline"
-              size={24}
-              color={focused ? Colors.primary : Colors.grey}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Rewards"
-        component={CustomerDashboardScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <AntDesign
-              name="staro"
-              size={24}
-              color={focused ? Colors.primary : Colors.grey} // Change icon color based on focus
-            />
-          ),
-        }}
-      />
+    checkLoggedIn();
+  }, []);
 
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <FontAwesome
-              name="user-circle-o"
-              size={24}
-              color={focused ? Colors.primary : Colors.grey}
-            />
-          ),
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
-// function StackNavigator() {
-//   return (
-//     <Stack.Navigator>
-//       <Stack.Screen
-//         name="Home"
-//         component={CustomerDashboardScreen}
-//         options={{ headerShown: false }}
-//       />
-//       <Stack.Screen name="Pickup" component={ScheduleScreen} />
-//       <Stack.Screen name="Success" component={SuccessScheduleScreen} />
-//     </Stack.Navigator>
-//   );
-// }
+  return null;
+};
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Tabs">
-          <Stack.Screen
-            name="Tabs"
-            component={Tabs}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Home"
-            component={CustomerDashboardScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="Pickup" component={ScheduleScreen} />
-          <Stack.Screen name="Success" component={SuccessScheduleScreen} />
-          <Stack.Screen
-            name="Nearest Center"
-            component={RecycleCenterLocatorScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaView>
+    <LoginProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <NavigationContainer>
+          <InitializeLoginStatus />
+          <MainNavigator />
+        </NavigationContainer>
+      </SafeAreaView>
+    </LoginProvider>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

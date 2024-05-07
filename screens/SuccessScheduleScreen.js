@@ -6,11 +6,11 @@ import Colors from "../constants/Colors";
 
 const SuccessScheduleScreen = ({ navigation }) => {
   const handleTrackRequest = () => {
-    navigation.navigate("Track Driver");
+    navigation.navigate("FindingDriver");
   };
 
   const handleDone = () => {
-    navigation.navigate("Tabs");
+    navigation.navigate("Home");
   };
 
   return (
