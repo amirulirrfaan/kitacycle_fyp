@@ -16,7 +16,7 @@ const ForgotPasswordScreen = () => {
 
   const handleResetPassword = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/forgotPassword", {
+      const res = await axios.post("http://172.20.10.14:8000/forgotPassword", {
         email,
       });
 

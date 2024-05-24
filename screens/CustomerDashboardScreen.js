@@ -7,42 +7,69 @@ import {
   Image,
   ScrollView,
   RefreshControl,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import BalanceCard from "../components/Dashboard/BalanceCard";
 import Colors from "../constants/Colors";
-import { MaterialIcons } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import { useLogin } from "../context/LoginProvider";
+import useSocket from "../hooks/useSocket";
+import { fetchUserData } from "../api/api";
 
 function CustomerDashboardScreen() {
   const navigation = useNavigation();
-  const [name, setName] = useState("");
-  const [points, setPoints] = useState(0);
+  const { user, logout } = useLogin();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  async function getUserData() {
-    const token = await AsyncStorage.getItem("token");
-    const response = await axios.post("http://localhost:8000/getUserData", {
-      token,
-    });
-    console.log("Response from server:", response.data);
-    setName(response.data.data.name);
-    setPoints(response.data.data.points);
-  }
+  const socket = useSocket();
 
-  //pull to refresh
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        await fetchUserData();
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        await logout();
+      }
+    };
+    initialize();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      socket.emit("join", { userId: user._id });
+
+      socket.on("pickupStatusChanged", (data) => {
+        Alert.alert(
+          "Hurray!",
+          `Collector has accepted your pickup request. Pickup is scheduled for ${data.pickupTime}`
+        );
+      });
+
+      return () => {
+        socket.off("pickupStatusChanged");
+      };
+    }
+  }, [user, socket]);
+
   const onRefresh = async () => {
     setRefreshing(true);
-    await getUserData();
+    await fetchUserData();
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    getUserData();
-  }, []);
+  if (loading) {
+    return <ActivityIndicator size="large" color={Colors.primary} />;
+  }
+
+  if (!user) {
+    return null; // Optionally render a placeholder or nothing
+  }
 
   return (
     <ScrollView
@@ -56,99 +83,86 @@ function CustomerDashboardScreen() {
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0.5 }}
-      ></LinearGradient>
-
+      />
       <View style={styles.container}>
-        {/* Greeting */}
         <View style={styles.greetingContainer}>
-          <Text style={styles.greetingUserText}>Hi {name}!</Text>
+          <TouchableOpacity
+            style={styles.notificationIcon}
+            onPress={() => {
+              navigation.navigate("Notification");
+            }}
+          >
+            <MaterialIcons name="notifications" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.greetingUserText}>Hi {user?.name || ""}!</Text>
           <Text style={styles.greetingText}>Let's clean our environment</Text>
         </View>
-
-        {/* Current Balance Card */}
-        <BalanceCard points={points} />
-
-        {/* Button */}
+        {user ? (
+          <BalanceCard points={user.points} />
+        ) : (
+          <Text style={styles.errorText}>Failed to load user data</Text>
+        )}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Pickup")}
-          >
-            <View style={styles.buttonContent}>
-              <FontAwesome5
-                style={styles.icon}
-                name="recycle"
-                size={24}
-                color="white"
-              />
-              <Text style={styles.text}>Book a pickup</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.button}
+          <DashboardButton
+            icon={<FontAwesome5 name="recycle" size={24} color="white" />}
+            text="Book a pickup"
+            onPress={() => navigation.navigate("Schedule Pickup")}
+          />
+          <DashboardButton
+            icon={<MaterialIcons name="place" size={24} color="white" />}
+            text="Nearest Center"
             onPress={() => navigation.navigate("Nearest Center")}
-          >
-            <View style={styles.buttonContent}>
-              <MaterialIcons
-                style={styles.icon}
-                name="place"
-                size={24}
-                color="white"
-              />
-              <Text style={styles.text}>Nearest Center</Text>
-            </View>
-          </TouchableOpacity>
+          />
         </View>
-
-        {/* Guide */}
-        <View style={styles.guideContainer}>
-          <View>
-            <Text style={styles.guideTitle}>How it Works</Text>
-          </View>
-          <View style={styles.stepContainer}>
-            <Image
-              source={require("../assets/images/calendar.png")}
-              style={styles.stepImage}
-            />
-            <View style={styles.stepContent}>
-              <Text style={styles.stepText}>Make a schedule</Text>
-              <Text style={styles.stepDetails}>
-                Fill in your address and pickup time.
-              </Text>
-            </View>
-          </View>
-          <View style={styles.separator} />
-          <View style={styles.stepContainer}>
-            <Image
-              source={require("../assets/images/truck.png")}
-              style={styles.stepImage}
-            />
-            <View style={styles.stepContent}>
-              <Text style={styles.stepText}>We will collect it</Text>
-              <Text style={styles.stepDetails}>
-                The collector will collect it from your home
-              </Text>
-            </View>
-          </View>
-          <View style={styles.separator} />
-          <View style={styles.stepContainer}>
-            <Image
-              source={require("../assets/images/star.png")}
-              style={styles.stepImage}
-            />
-            <View style={styles.stepContent}>
-              <Text style={styles.stepText}>You get KitaPoints!</Text>
-              <Text style={styles.stepDetails}>
-                Earn rewards for your contribution.
-              </Text>
-            </View>
-          </View>
-        </View>
+        <Guide />
       </View>
     </ScrollView>
   );
 }
+
+const DashboardButton = ({ icon, text, onPress }) => (
+  <TouchableOpacity style={styles.button} onPress={onPress}>
+    <View style={styles.buttonContent}>
+      {icon}
+      <Text style={styles.text}>{text}</Text>
+    </View>
+  </TouchableOpacity>
+);
+
+const Guide = () => (
+  <View style={styles.guideContainer}>
+    <Text style={styles.guideTitle}>How it Works</Text>
+    <GuideStep
+      image={require("../assets/images/calendar.png")}
+      title="Make a schedule"
+      details="Fill in your address and pickup time."
+    />
+    <Separator />
+    <GuideStep
+      image={require("../assets/images/truck.png")}
+      title="We will collect it"
+      details="The collector will collect it from your home."
+    />
+    <Separator />
+    <GuideStep
+      image={require("../assets/images/star.png")}
+      title="You get KitaPoints!"
+      details="Earn rewards for your contribution."
+    />
+  </View>
+);
+
+const GuideStep = ({ image, title, details }) => (
+  <View style={styles.stepContainer}>
+    <Image source={image} style={styles.stepImage} />
+    <View style={styles.stepContent}>
+      <Text style={styles.stepText}>{title}</Text>
+      <Text style={styles.stepDetails}>{details}</Text>
+    </View>
+  </View>
+);
+
+const Separator = () => <View style={styles.separator} />;
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -165,20 +179,20 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 24,
     paddingVertical: 12,
-    alignItems: "stretch",
     justifyContent: "flex-end",
     backgroundColor: Colors.primary,
   },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-    lineHeight: 36,
-    marginBottom: 12,
+  notificationIcon: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 2000,
   },
   greetingContainer: {
     marginBottom: 20,
     alignSelf: "flex-start",
+    position: "relative",
+    width: "100%",
   },
   greetingUserText: {
     color: "white",
@@ -189,10 +203,13 @@ const styles = StyleSheet.create({
   greetingText: {
     color: "white",
   },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+  },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    // marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
@@ -209,9 +226,6 @@ const styles = StyleSheet.create({
   text: {
     color: "#fff",
     fontSize: 16,
-  },
-  icon: {
-    marginBottom: 10,
   },
   guideContainer: {
     marginTop: 20,

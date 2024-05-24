@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
-import { StyleSheet, SafeAreaView } from "react-native";
+import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoginProvider, { useLogin } from "./context/LoginProvider";
 import MainNavigator from "./navigation/mainNavigator";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 const InitializeLoginStatus = () => {
   const { setIsLoggedIn } = useLogin();
@@ -29,14 +31,18 @@ const InitializeLoginStatus = () => {
 
 export default function App() {
   return (
-    <LoginProvider>
-      <SafeAreaView style={styles.safeArea}>
-        <NavigationContainer>
-          <InitializeLoginStatus />
-          <MainNavigator />
-        </NavigationContainer>
-      </SafeAreaView>
-    </LoginProvider>
+    <StripeProvider publishableKey="pk_test_51PJfG705yUtdB5DnlLVAk3FiHnr049jde10ZPpHedZkW0HSwTA4uqAIzD5mjwzHmw9ZuBEePTKUDOgOCJsUuwlfO00vU3ZpyKN">
+      <LoginProvider>
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.safeArea}>
+            <NavigationContainer>
+              <InitializeLoginStatus />
+              <MainNavigator />
+            </NavigationContainer>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </LoginProvider>
+    </StripeProvider>
   );
 }
 

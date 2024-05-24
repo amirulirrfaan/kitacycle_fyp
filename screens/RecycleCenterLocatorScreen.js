@@ -12,6 +12,9 @@ import { markers } from "../assets/markers";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import MapViewDirections from "react-native-maps-directions";
+import GOOGLE_API_KEY from "../google_api_key";
+import Colors from "../constants/Colors";
 
 const RecycleCenterLocatorScreen = () => {
   const [location, setLocation] = useState(null);
@@ -62,6 +65,12 @@ const RecycleCenterLocatorScreen = () => {
         showsUserLocation={true}
         showsMyLocationButton={true}
       >
+        <MapViewDirections
+          origin={initialRegion}
+          destination={markers[0].coordinate}
+          strokeWidth={3}
+          apikey={GOOGLE_API_KEY}
+        />
         {markers.map((marker) => (
           <Marker
             key={marker.id}

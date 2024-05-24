@@ -15,25 +15,19 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
-  const { setIsLoggedIn } = useLogin();
-  const [name, setName] = useState("");
-
-  async function getUserData() {
-    const token = await AsyncStorage.getItem("token");
-    const response = await axios.post("http://localhost:8000/getUserData", {
-      token,
-    });
-    setName(response.data.data.name);
-  }
-
-  useEffect(() => {
-    getUserData();
-  }, []);
+  const { setIsLoggedIn, user } = useLogin();
 
   const handleLogout = async () => {
-    // Clear authentication state
-    await AsyncStorage.removeItem("isLoggedIn");
-    setIsLoggedIn(false);
+    try {
+      // Clear authentication and user state
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("user");
+
+      // Optionally, clear other relevant state
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    }
   };
   return (
     <View style={styles.container}>
@@ -51,7 +45,7 @@ const ProfileScreen = () => {
                 style={styles.profileImage}
               />
             </View>
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{user.name}</Text>
             <Text style={styles.phoneNumber}>123-456-7890</Text>
           </View>
         </LinearGradient>

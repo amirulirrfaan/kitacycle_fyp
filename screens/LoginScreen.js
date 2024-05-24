@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -7,35 +7,35 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import { useLogin } from "../context/LoginProvider";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ navigation }) {
-  const { setIsLoggedIn } = useLogin();
+  const { login, loading } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  handleLoginPress = async () => {
-    try {
-      const res = await axios.post("http://localhost:8000/login", {
-        email,
-        password,
-      });
+  const validateInputs = () => {
+    if (!email || !password) {
+      Alert.alert(
+        "Validation Error",
+        "Please fill in both email and password."
+      );
+      return false;
+    }
+    return true;
+  };
 
-      if (res.data.success) {
-        AsyncStorage.setItem("token", res.data.token);
-        AsyncStorage.setItem("isLoggedIn", JSON.stringify(true));
-        setIsLoggedIn(true);
-      } else {
-        alert(res.data.message);
-      }
+  const handleLoginPress = async () => {
+    if (!validateInputs()) return;
+
+    try {
+      await login(email, password);
     } catch (error) {
-      console.error("Error during login:", error);
-      Alert.alert("Login Failed", "An error occurred during login.");
+      console.log("Login error: ", error.message);
+      Alert.alert("Login Failed", error.message);
     }
   };
 
@@ -47,9 +47,7 @@ function LoginScreen({ navigation }) {
           style={styles.logo}
           resizeMode="contain"
         />
-
         <Text style={styles.title}>Login</Text>
-
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -57,15 +55,14 @@ function LoginScreen({ navigation }) {
           onChangeText={(text) => setEmail(text)}
           autoCapitalize="none"
         />
-
         <TextInput
           style={styles.input}
           placeholder="Password"
           value={password}
           onChangeText={(text) => setPassword(text)}
           autoCapitalize="none"
+          secureTextEntry
         />
-
         <TouchableOpacity>
           <Text
             style={styles.forgotPasswordLink}
@@ -74,7 +71,6 @@ function LoginScreen({ navigation }) {
             Forgot Password?
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity>
           <Text
             style={styles.createAccountLink}
@@ -84,7 +80,11 @@ function LoginScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
-      <PrimaryButton title="Login" onPress={() => handleLoginPress()} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <PrimaryButton title="Login" onPress={handleLoginPress} />
+      )}
     </View>
   );
 }
@@ -118,7 +118,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     paddingLeft: 10,
-    textAlign: "auto",
   },
   forgotPasswordLink: {
     color: "black",

@@ -4,13 +4,12 @@ import LottieView from "lottie-react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import Colors from "../constants/Colors";
 
+// Import icons for each item
+import { MaterialIcons } from "@expo/vector-icons";
+
 const SuccessScheduleScreen = ({ navigation }) => {
   const handleTrackRequest = () => {
-    navigation.navigate("FindingDriver");
-  };
-
-  const handleDone = () => {
-    navigation.navigate("Home");
+    navigation.navigate("Tabs");
   };
 
   return (
@@ -24,18 +23,14 @@ const SuccessScheduleScreen = ({ navigation }) => {
       />
 
       {/* Success Message */}
-      <Text style={styles.successText}>Successfully Requested!</Text>
-
-      {/* Track Request Button */}
-      <PrimaryButton title="Track Request" onPress={handleTrackRequest} />
+      <Text style={styles.successText}>Great!</Text>
+      <Text style={styles.notifyText}>
+        Your pickup is confirmed, thanks for contributing to clean environment.
+        Kindly wait for the collector to accept your request.
+      </Text>
 
       {/* Done Button */}
-      <TouchableOpacity
-        style={[styles.doneButton, styles.button]}
-        onPress={handleDone}
-      >
-        <Text style={styles.buttonText}>Done</Text>
-      </TouchableOpacity>
+      <PrimaryButton title="Done" onPress={handleTrackRequest} />
     </View>
   );
 };
@@ -54,22 +49,51 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginVertical: 20,
   },
-  button: {
-    width: "60%",
-    paddingVertical: 12,
+  notifyText: {
+    fontSize: 15,
+    marginVertical: 30,
+    marginHorizontal: 30,
+    textAlign: "center",
     justifyContent: "center",
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: "80%",
+  },
+  cardTitle: {
+    alignSelf: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  cardItem: {
+    flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.primary,
+    marginBottom: 5,
+    padding: 3,
   },
-  buttonText: {
-    fontSize: 16,
-    color: Colors.primary,
+  divider: {
+    borderBottomColor: "rgba(0, 0, 0, 0.1)",
+    borderBottomWidth: 1,
+    marginBottom: 5,
   },
-  doneButton: {
-    backgroundColor: "transparent", // Set background color to transparent
+  cardLabel: {
+    marginLeft: 5,
+    fontWeight: "bold",
+  },
+  cardValue: {
+    marginLeft: 10,
   },
 });
 

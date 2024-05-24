@@ -1,106 +1,159 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
+  Animated,
   TouchableOpacity,
-  FlatList,
   Image,
-  TextInput,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
-import Colors from "../constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
+import Colors from "../constants/Colors"; // Assuming you have a Colors file for your color constants
+import { useLogin } from "../context/LoginProvider";
 import axios from "axios";
 
-const RewardsScreen = () => {
-  const [rewards, setRewards] = useState([
-    {
-      id: 1,
-      name: "Free Coffee",
-      points: 50,
-      image: require("../assets/images/star.png"),
-    },
-    {
-      id: 2,
-      name: "Discount Voucher",
-      points: 100,
-      image: require("../assets/images/star.png"),
-    },
-    {
-      id: 3,
-      name: "Movie Ticket",
-      points: 150,
-      image: require("../assets/images/star.png"),
-    },
-  ]);
+const HEADER_MAX_HEIGHT = 200;
+const HEADER_MIN_HEIGHT = 60;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
-  const [searchQuery, setSearchQuery] = useState("");
+const RewardsTab = () => {
+  const { user, setUser } = useLogin();
+  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const [rewards, setRewards] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const renderRewardItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.rewardItem}
-      onPress={() => handleClaimReward(item)}
-    >
-      <Image source={item.image} style={styles.rewardImage} />
-      <View style={styles.rewardDetails}>
-        <Text style={styles.rewardName}>{item.name}</Text>
-        <Text style={styles.rewardPoints}>{item.points} KitaPoints</Text>
-        <TouchableOpacity
-          style={styles.claimButton}
-          onPress={handleClaimReward}
-        >
-          <Text style={styles.claimButtonText}>Claim</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+  useEffect(() => {
+    const fetchRewards = async () => {
+      try {
+        const response = await axios.get("http://172.20.10.14:8000/getRewards");
+        setRewards(response.data);
+      } catch (error) {
+        console.error("Error fetching rewards data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleClaimReward = async (reward) => {
+    fetchRewards();
+  }, []);
+
+  const handleRedeemReward = async (rewardId, cost) => {
     try {
-      // Make an API call to deduct points
-      const response = await axios.post("http://localhost:8000/addUserPoints", {
-        email: "kambai@g.com", // Provide the user's email
-        points: reward.points, // Deduct points based on the reward
-      });
+      const response = await axios.post(
+        "http://172.20.10.14:8000/redeemReward",
+        {
+          userId: user._id,
+          rewardId,
+        }
+      );
 
-      // Check if the API call was successful
-      if (response.status === 200) {
-        // If points are deducted successfully, remove the claimed reward from the list
-        const updatedRewards = rewards.filter((r) => r.id !== reward.id);
-        setRewards(updatedRewards);
+      if (response.data.message === "Reward redeemed successfully.") {
+        console.log(`Redeemed reward with ID: ${rewardId} for ${cost} points`);
+        // Update UI or state to reflect the new points and redeemed reward
+        setUser({ ...user, points: response.data.points });
       } else {
-        // If there's an error, show an alert
-        Alert.alert("Error", "Failed to claim reward. Please try again later.");
+        console.error("Failed to redeem reward:", response.data.message);
       }
     } catch (error) {
-      console.error("Error claiming reward:", error);
-      // If there's an error, show an alert
-      Alert.alert(
-        "Error",
-        "An unexpected error occurred. Please try again later."
-      );
+      console.error("Error redeeming reward:", error);
     }
   };
 
-  const filteredRewards = rewards.filter((reward) =>
-    reward.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const renderRewardItem = ({ item }) => (
+    <View style={styles.rewardContainer}>
+      <Image source={{ uri: item.image }} style={styles.rewardImage} />
+      <View style={styles.rewardDetails}>
+        <Text style={styles.rewardTitle}>{item.title}</Text>
+        <Text style={styles.rewardDescription}>{item.description}</Text>
+        <View style={styles.rewardFooter}>
+          <Text style={styles.rewardCost}>{item.cost} pts</Text>
+          <TouchableOpacity
+            style={styles.redeemButton}
+            onPress={() => handleRedeemReward(item._id, item.cost)}
+          >
+            <Text style={styles.buttonText}>Redeem</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: "clamp",
+  });
+
+  const headerTitleOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.5, 0],
+    extrapolate: "clamp",
+  });
+
+  const smallHeaderTitleOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, 0.5, 1],
+    extrapolate: "clamp",
+  });
+
+  const headerTitleTransform = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -50],
+    extrapolate: "clamp",
+  });
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Rewards</Text>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="🔍 Search Rewards"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-      <FlatList
-        data={filteredRewards}
+      <Animated.FlatList
+        data={rewards}
+        keyExtractor={(item) => item._id}
         renderItem={renderRewardItem}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.rewardList}
+        contentContainerStyle={styles.listContentContainer}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
       />
+      <Animated.View style={[styles.header, { height: headerHeight }]}>
+        <LinearGradient
+          colors={[Colors.gradientOne, Colors.gradientTwo]}
+          style={styles.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0.5 }}
+        >
+          <Animated.View
+            style={{
+              opacity: headerTitleOpacity,
+              transform: [{ translateY: headerTitleTransform }],
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.headerText}>KitaPoints</Text>
+            <Text style={styles.pointsText}>Current Points</Text>
+            <Text style={styles.pointsValue}>{user.points}</Text>
+          </Animated.View>
+          <Animated.View
+            style={{
+              opacity: smallHeaderTitleOpacity,
+              position: "absolute",
+              bottom: 10,
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.smallPointsValue}>{user.points} KP</Text>
+          </Animated.View>
+        </LinearGradient>
+      </Animated.View>
     </View>
   );
 };
@@ -108,66 +161,100 @@ const RewardsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "#F5F5F5",
   },
   header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    overflow: "hidden",
+  },
+  gradient: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 40,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  pointsText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  pointsValue: {
+    color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginTop: 10,
   },
-  searchInput: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginBottom: 10,
+  smallPointsValue: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
-  rewardList: {
-    flex: 1,
+  listContentContainer: {
+    paddingTop: HEADER_MAX_HEIGHT + 20,
+    paddingHorizontal: 20,
   },
-  rewardItem: {
+  rewardContainer: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 8,
     flexDirection: "row",
-    backgroundColor: "white",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   rewardImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
   },
   rewardDetails: {
     flex: 1,
   },
-  rewardName: {
-    fontSize: 15,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  rewardPoints: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 10,
-  },
-  claimButton: {
-    backgroundColor: Colors.secondary,
-    padding: 10,
-    borderRadius: 5,
-  },
-  claimButtonText: {
-    color: Colors.primary,
+  rewardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
+  },
+  rewardDescription: {
+    fontSize: 14,
+    color: "#666",
+    marginVertical: 5,
+  },
+  rewardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rewardCost: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  redeemButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-export default RewardsScreen;
+export default RewardsTab;

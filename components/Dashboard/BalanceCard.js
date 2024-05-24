@@ -4,7 +4,6 @@ import Colors from "../../constants/Colors";
 
 function BalanceCard(props) {
   const { points } = props;
-  console.log("Points:", points);
   return (
     <View style={styles.card}>
       <View style={styles.textContainer}>

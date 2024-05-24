@@ -1,14 +1,12 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import CustomerDashboardScreen from "../screens/CustomerDashboardScreen";
-import ScheduleScreen from "../screens/ScheduleScreen";
-import { FontAwesome } from "@expo/vector-icons";
-import Colors from "../constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
 import ProfileScreen from "../screens/ProfileScreen";
 import RewardsScreen from "../screens/RewardsScreen";
 import RecycleItemPriceScreen from "../screens/RecycleItemPriceScreen";
+import PickupHistory from "../screens/PickupHistory";
+import Colors from "../constants/Colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -25,27 +23,12 @@ const Tabs = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="CustomerDashboard"
         component={CustomerDashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <AntDesign
               name="home"
-              size={24}
-              color={focused ? Colors.primary : Colors.grey}
-            />
-          ),
-          headerShown: false,
-        }}
-      />
-      <Tab.Screen
-        name="Learn"
-        component={RecycleItemPriceScreen}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="bulb-outline"
               size={24}
               color={focused ? Colors.primary : Colors.grey}
             />
@@ -56,22 +39,45 @@ const Tabs = () => {
         name="Rewards"
         component={RewardsScreen}
         options={{
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <AntDesign
-              name="staro"
+            <Ionicons
+              name="star-outline"
               size={24}
-              color={focused ? Colors.primary : Colors.grey} // Change icon color based on focus
+              color={focused ? Colors.primary : Colors.grey}
             />
           ),
         }}
       />
-
+      <Tab.Screen
+        name="Learn"
+        component={RecycleItemPriceScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="bulb-outline"
+              size={24}
+              color={focused ? Colors.primary : Colors.grey}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Pickups"
+        component={PickupHistory}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <AntDesign
+              name="calendar"
+              size={24}
+              color={focused ? Colors.primary : Colors.grey}
+            />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome
               name="user-circle-o"
