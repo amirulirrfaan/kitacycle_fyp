@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,98 +8,42 @@ import {
   Image,
   TouchableOpacity,
   Platform,
-  Button,
 } from "react-native";
 import Colors from "../constants/Colors";
 import axios from "axios";
 
 const SelectItemScreen = ({ setSelectedItems }) => {
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: "Paper",
-      price: 0.5,
-      weight: 0,
-      image: require("../assets/images/RecycleItems/paper.png"),
-    },
-    {
-      id: 2,
-      name: "Plastic",
-      price: 0.3,
-      weight: 0,
-      image: require("../assets/images/RecycleItems/plastic.png"),
-    },
-    {
-      id: 3,
-      name: "Glass",
-      price: 0.8,
-      weight: 0,
-      image: require("../assets/images/RecycleItems/glass.png"),
-    },
-    {
-      id: 4,
-      name: "Metal",
-      price: 1.2,
-      weight: 0,
-      //   image: require("../assets/metal.jpg"),
-    },
-    {
-      id: 5,
-      name: "Cardboard",
-      price: 0.4,
-      weight: 0,
-      //   image: require("../assets/cardboard.jpg"),
-    },
-    {
-      id: 6,
-      name: "Aluminum Cans",
-      price: 1.5,
-      weight: 0,
-      image: require("../assets/images/RecycleItems/can.png"),
-    },
-    {
-      id: 7,
-      name: "Electronics",
-      price: 2.0,
-      weight: 0,
-      //   image: require("../assets/electronics.jpg"),
-    },
-    {
-      id: 8,
-      name: "Batteries",
-      price: 3.0,
-      weight: 0,
-      //   image: require("../assets/batteries.jpg"),
-    },
-    {
-      id: 9,
-      name: "Tires",
-      price: 2.5,
-      weight: 0,
-      //   image: require("../assets/tires.jpg"),
-    },
-    {
-      id: 10,
-      name: "Clothing",
-      price: 1.0,
-      weight: 0,
-      //   image: require("../assets/clothing.jpg"),
-    },
-  ]);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const response = await axios.get("http://172.20.10.14:8000/getItem");
+      const fetchedItems = response.data.map((item) => ({
+        ...item,
+        weight: 0,
+      }));
+      setItems(fetchedItems);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.itemInfo}>
-        <Image source={item.image} style={styles.itemImage} />
+        <Image source={{ uri: item.image }} style={styles.itemImage} />
         <View style={styles.itemText}>
           <Text style={styles.itemName}>{item.name}</Text>
           <Text style={styles.itemPrice}>RM{item.price.toFixed(2)}/kg</Text>
         </View>
       </View>
       <View style={styles.weightContainer}>
-        {/* Minus Button */}
         <TouchableOpacity
-          onPress={() => handleWeightChange(item.id, item.weight - 1)}
+          onPress={() => handleWeightChange(item._id, item.weight - 1)}
           style={[styles.weightButton, { backgroundColor: Colors.grey }]}
         >
           <Text style={[styles.weightButtonText, { color: "white" }]}>-</Text>
@@ -109,13 +53,11 @@ const SelectItemScreen = ({ setSelectedItems }) => {
           keyboardType="numeric"
           value={item.weight.toString()}
           onChangeText={(text) =>
-            handleWeightChange(item.id, text, item.weight)
+            handleWeightChange(item._id, parseFloat(text))
           }
         />
-
-        {/* Plus Button */}
         <TouchableOpacity
-          onPress={() => handleWeightChange(item.id, item.weight + 1)}
+          onPress={() => handleWeightChange(item._id, item.weight + 1)}
           style={styles.weightButton}
         >
           <Text style={styles.weightButtonText}>+</Text>
@@ -126,7 +68,7 @@ const SelectItemScreen = ({ setSelectedItems }) => {
 
   const handleWeightChange = (itemId, newWeight) => {
     const updatedItems = items.map((item) =>
-      item.id === itemId
+      item._id === itemId
         ? { ...item, weight: newWeight < 0 ? 0 : newWeight }
         : item
     );
@@ -139,7 +81,7 @@ const SelectItemScreen = ({ setSelectedItems }) => {
       <FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item._id.toString()}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -179,7 +121,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 10,
-    // borderRadius: 25,
+    borderRadius: 25,
   },
   itemText: {
     justifyContent: "center",

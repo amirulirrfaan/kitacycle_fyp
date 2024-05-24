@@ -1,16 +1,5 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
-import { CardForm, useStripe } from "@stripe/stripe-react-native";
-import PrimaryButton from "../components/PrimaryButton";
-import Colors from "../constants/Colors";
+import React from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 const CheckOutScreen = ({
   items,
@@ -18,20 +7,10 @@ const CheckOutScreen = ({
   time,
   coordinates,
   address,
-  clientSecret,
-  onPaymentSuccess,
+  totalPickupWeight,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [showCardField, setShowCardField] = useState(false);
-  const { confirmPayment } = useStripe();
-
   // Filter out items with weight > 0
   const nonZeroWeightItems = items.filter((item) => item.weight > 0);
-
-  // Calculate total weight
-  const totalWeight = nonZeroWeightItems.reduce((total, item) => {
-    return total + item.weight;
-  }, 0);
 
   // Format date and time
   const formatDate = (date) => {
@@ -51,30 +30,6 @@ const CheckOutScreen = ({
     return `Lat: ${coordinates.coordinates[1]}, Lon: ${coordinates.coordinates[0]}`;
   };
 
-  const handlePayPress = async () => {
-    setLoading(true);
-    try {
-      const { paymentIntent, error } = await confirmPayment(clientSecret, {
-        type: "Card",
-        billingDetails: {
-          /* Add any required billing details */
-        },
-      });
-
-      if (error) {
-        Alert.alert("Payment Failed", error.message);
-      } else if (paymentIntent) {
-        Alert.alert("Payment Successful", "Your payment was successful.");
-        onPaymentSuccess();
-      }
-    } catch (error) {
-      console.error("Payment error: ", error.message);
-      Alert.alert("Payment Error", "An error occurred during payment.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <ScrollView
       contentContainerStyle={styles.container}
@@ -84,14 +39,14 @@ const CheckOutScreen = ({
 
       <View style={styles.itemsContainer}>
         {nonZeroWeightItems.map((item) => (
-          <View style={styles.itemRow} key={item.id}>
+          <View style={styles.itemRow} key={item._id}>
             <Text style={styles.itemName}>{item.name}</Text>
             <Text style={styles.itemWeight}>{item.weight} kg</Text>
           </View>
         ))}
         <View style={styles.totalRow}>
           <Text style={styles.totalText}>Total</Text>
-          <Text style={styles.totalWeight}>{totalWeight} kg</Text>
+          <Text style={styles.totalWeight}>{totalPickupWeight} kg</Text>
         </View>
       </View>
 
@@ -103,38 +58,6 @@ const CheckOutScreen = ({
         <Text style={styles.summaryText}>
           Coordinates: {formatCoordinates(coordinates)}
         </Text>
-      </View>
-
-      <View style={styles.paymentContainer}>
-        <TouchableOpacity
-          style={styles.paymentMethodContainer}
-          onPress={() => setShowCardField(true)}
-        >
-          <View style={styles.paymentMethodTextContainer}>
-            <Text style={styles.paymentMethodTitle}>Payment Method</Text>
-            <Text style={styles.paymentMethodSubtitle}>
-              Via Credit/Debit Card
-            </Text>
-          </View>
-          <Text style={styles.editIcon}>✎</Text>
-        </TouchableOpacity>
-        {showCardField && (
-          <View style={styles.cardFieldContainer}>
-            <CardForm
-              postalCodeEnabled={true}
-              placeholders={{
-                number: "4242 4242 4242 4242",
-              }}
-              cardStyle={styles.card}
-              style={styles.cardContainer}
-            />
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-              <PrimaryButton title="Pay" onPress={handlePayPress} />
-            )}
-          </View>
-        )}
       </View>
     </ScrollView>
   );
@@ -204,49 +127,6 @@ const styles = StyleSheet.create({
   summaryText: {
     fontSize: 16,
     marginBottom: 5,
-  },
-  paymentContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderColor: "#ccc",
-    borderWidth: 1,
-  },
-  paymentMethodContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-  },
-  paymentMethodTextContainer: {
-    flexDirection: "column",
-  },
-  paymentMethodTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  paymentMethodSubtitle: {
-    fontSize: 14,
-    color: "#666",
-  },
-  editIcon: {
-    fontSize: 18,
-    color: "#666",
-  },
-  cardFieldContainer: {
-    marginTop: 20,
-    paddingHorizontal: 10,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    textColor: "#000000",
-  },
-  cardContainer: {
-    height: 200, // Increased height for vertical layout
-    marginVertical: 10,
   },
 });
 

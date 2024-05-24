@@ -9,8 +9,10 @@ import {
   RefreshControl,
   Alert,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import BalanceCard from "../components/Dashboard/BalanceCard";
+import NotificationModal from "../components/Dashboard/NotificationModal";
 import Colors from "../constants/Colors";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,12 +20,14 @@ import { useNavigation } from "@react-navigation/native";
 import { useLogin } from "../context/LoginProvider";
 import useSocket from "../hooks/useSocket";
 import { fetchUserData } from "../api/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function CustomerDashboardScreen() {
   const navigation = useNavigation();
-  const { user, logout } = useLogin();
+  const { user, setUser, logout } = useLogin();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState(null);
 
   const socket = useSocket();
 
@@ -41,26 +45,55 @@ function CustomerDashboardScreen() {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user && socket) {
       socket.emit("join", { userId: user._id });
 
-      socket.on("pickupStatusChanged", (data) => {
-        Alert.alert(
-          "Hurray!",
-          `Collector has accepted your pickup request. Pickup is scheduled for ${data.pickupTime}`
-        );
+      socket.on("pickupAccepted", (data) => {
+        setNotification(data.message);
+      });
+
+      socket.on("pickupOnTheWay", (data) => {
+        setNotification(data.message);
+      });
+
+      socket.on("pickupArrived", (data) => {
+        setNotification(data.message);
+      });
+
+      socket.on("pickupCompleted", (data) => {
+        setNotification(data.message);
       });
 
       return () => {
-        socket.off("pickupStatusChanged");
+        socket.off("pickupAccepted");
+        socket.off("pickupOnTheWay");
+        socket.off("pickupArrived");
+        socket.off("pickupCompleted");
       };
     }
   }, [user, socket]);
 
+  const closeModal = () => {
+    setNotification(null);
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchUserData();
-    setRefreshing(false);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const userData = await fetchUserData(token);
+        console.log("User data:", userData);
+        setUser(userData);
+      } else {
+        console.error("No token found");
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+      Alert.alert("Error", "Failed to refresh user data");
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   if (loading) {
@@ -111,11 +144,13 @@ function CustomerDashboardScreen() {
           <DashboardButton
             icon={<MaterialIcons name="place" size={24} color="white" />}
             text="Nearest Center"
-            onPress={() => navigation.navigate("Nearest Center")}
+            onPress={() => navigation.navigate("RecycleCenterLocator")}
           />
         </View>
         <Guide />
       </View>
+
+      <NotificationModal notification={notification} closeModal={closeModal} />
     </ScrollView>
   );
 }
@@ -260,6 +295,32 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(0, 0, 0, 0.1)",
     borderBottomWidth: 1,
     marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: Colors.primary,
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
 import StepIndicator from "react-native-step-indicator";
 import Colors from "../constants/Colors";
@@ -17,9 +17,19 @@ const PickupRequestScreen = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedCoordinates, setSelectedCoordinates] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [totalWeight, setTotalWeight] = useState(0);
 
   const navigation = useNavigation();
   const { user } = useLogin();
+
+  // Calculate total weight whenever selected items change
+  useEffect(() => {
+    const calculateTotalWeight = () => {
+      const total = selectedItems.reduce((sum, item) => sum + item.weight, 0);
+      setTotalWeight(total);
+    };
+    calculateTotalWeight();
+  }, [selectedItems]);
 
   // Function to handle step change
   const handleStepChange = (stepNumber) => {
@@ -30,8 +40,12 @@ const PickupRequestScreen = () => {
   const nextStep = async () => {
     if (step < 3) {
       if (step === 1) {
-        if (selectedItems.length === 0) {
-          Alert.alert("Validation Error", "Please select at least one item.");
+        const hasValidItem = selectedItems.some((item) => item.weight > 0);
+        if (!hasValidItem) {
+          Alert.alert(
+            "Validation Error",
+            "Please select at least one item with a weight greater than 0."
+          );
           return;
         }
       } else if (step === 2 && !isValid) {
@@ -63,13 +77,14 @@ const PickupRequestScreen = () => {
     const pickupData = {
       userId: user._id,
       items: selectedItems.map((item) => ({
-        itemId: item.id,
+        itemId: item._id,
         itemWeight: item.weight,
       })),
       pickupDate: selectedDate,
       pickupTime: selectedTime,
       coordinates: selectedCoordinates,
       address: selectedAddress,
+      totalWeight: totalWeight, // Ensure totalWeight is included here
     };
 
     const response = await axios.post(
@@ -107,7 +122,7 @@ const PickupRequestScreen = () => {
     currentStepLabelColor: Colors.primary,
   };
 
-  const labels = ["Select Item", "Schedule Date", "Check Out"];
+  const labels = ["Select Item", "Schedule Date", "Pickup Summary"];
 
   return (
     <View style={styles.container}>
@@ -119,7 +134,11 @@ const PickupRequestScreen = () => {
         onPress={handleStepChange}
       />
 
-      {step === 1 && <SelectItemScreen setSelectedItems={setSelectedItems} />}
+      {step === 1 && (
+        <>
+          <SelectItemScreen setSelectedItems={setSelectedItems} />
+        </>
+      )}
 
       {step === 2 && (
         <ScheduleScreen
@@ -135,12 +154,12 @@ const PickupRequestScreen = () => {
 
       {step === 3 && (
         <CheckOutScreen
-          onValidate={handleValidation}
           items={selectedItems}
           date={selectedDate}
           time={selectedTime}
           address={selectedAddress}
           coordinates={selectedCoordinates}
+          totalPickupWeight={totalWeight}
         />
       )}
 
@@ -174,6 +193,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+    textAlign: "center",
+  },
+  errorText: {
+    color: "red",
+    marginTop: 10,
     textAlign: "center",
   },
 });

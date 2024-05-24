@@ -13,7 +13,6 @@ const useSocket = () => {
 
       return () => {
         console.log("Cleaning up socket events");
-        socket.off("pickupStatusChanged");
       };
     } else {
       console.log("No user, skipping socket setup");
