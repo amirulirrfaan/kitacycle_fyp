@@ -7,6 +7,7 @@ import RewardsScreen from "../screens/RewardsScreen";
 import RecycleItemPriceScreen from "../screens/RecycleItemPriceScreen";
 import PickupHistory from "../screens/PickupHistory";
 import Colors from "../constants/Colors";
+import LearnScreen from "../screens/LearnScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -16,6 +17,9 @@ const Tabs = () => {
       screenOptions={{
         tabBarStyle: {
           backgroundColor: "#fff",
+          height: 60,
+          paddingBottom: 5,
+          paddingTop: 5,
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.grey,
@@ -23,7 +27,7 @@ const Tabs = () => {
       }}
     >
       <Tab.Screen
-        name="CustomerDashboard"
+        name="Home"
         component={CustomerDashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -50,7 +54,7 @@ const Tabs = () => {
       />
       <Tab.Screen
         name="Learn"
-        component={RecycleItemPriceScreen}
+        component={LearnScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <Ionicons

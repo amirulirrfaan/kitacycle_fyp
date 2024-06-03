@@ -19,15 +19,19 @@ import CollectorTrackingScreen from "../screens/CollectorTrackingScreen";
 
 import { useLogin } from "../context/LoginProvider";
 import VerifyEmailScreen from "../screens/VerifyEmailScreen";
+import OnboardingScreen from "../screens/OnboardingScreen";
+import Colors from "../constants/Colors";
+import HowToRecycleProperly from "../screens/HowToRecycleProperly";
+import RecyclingQuiz from "../screens/RecyclingQuiz";
 
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
   </Stack.Navigator>
 );
@@ -53,6 +57,8 @@ const AppStack = () => (
       name="CollectorTracking"
       component={CollectorTrackingScreen}
     />
+    <Stack.Screen name="HowToRecycle" component={HowToRecycleProperly} />
+    <Stack.Screen name="Quiz" component={RecyclingQuiz} />
   </Stack.Navigator>
 );
 
@@ -62,7 +68,7 @@ const MainNavigator = () => {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }

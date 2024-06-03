@@ -61,14 +61,6 @@ const OrderItem = ({ order }) => {
         Date: {new Date(order.pickupDate).toLocaleDateString()} Time:{" "}
         {order.pickupTime}
       </Text>
-      {order.pickupStatus === "onTheWay" && (
-        <TouchableOpacity
-          style={styles.trackButton}
-          onPress={handleTrackCollector}
-        >
-          <Text style={styles.buttonText}>Track Collector</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };

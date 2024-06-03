@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser, fetchUserData } from "../api/api";
+import { Alert } from "react-native";
 
 const LoginContext = createContext();
 
@@ -36,22 +37,22 @@ const LoginProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const data = await loginUser(email, password);
       if (data?.token && data?.user) {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
-        console.log("User logged in, token and user data saved.");
         setUser(data.user);
         setIsLoggedIn(true);
       } else {
         throw new Error("Invalid token or user data");
       }
     } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
+      const errorMessage = error.message;
+      console.error("Login error:", errorMessage);
+      Alert.alert("Login Error", errorMessage);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

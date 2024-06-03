@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "/Users/irrfaan/Documents/FYP/kitacycle_fyp/assets/images/KitaCycle.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

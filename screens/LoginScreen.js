@@ -6,11 +6,12 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import { useLogin } from "../context/LoginProvider";
+import Colors from "../constants/Colors"; // Ensure you import Colors if you are using it
 
 function LoginScreen({ navigation }) {
   const { login, loading } = useLogin();
@@ -18,11 +19,16 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
 
   const validateInputs = () => {
-    if (!email || !password) {
-      Alert.alert(
-        "Validation Error",
-        "Please fill in both email and password."
-      );
+    if (!email && !password) {
+      Alert.alert("Input Required", "Please enter your email and password.");
+      return false;
+    }
+    if (!email) {
+      Alert.alert("Input Required", "Please enter your email.");
+      return false;
+    }
+    if (!password) {
+      Alert.alert("Input Required", "Please enter your password.");
       return false;
     }
     return true;
@@ -34,8 +40,7 @@ function LoginScreen({ navigation }) {
     try {
       await login(email, password);
     } catch (error) {
-      console.log("Login error: ", error.message);
-      Alert.alert("Login Failed", error.message);
+      Alert.alert("Login Error", error.message);
     }
   };
 
@@ -43,9 +48,9 @@ function LoginScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require("../assets/images/logo.png")}
+          source={require("../assets/images/KitaCycle.png")}
           style={styles.logo}
-          resizeMode="contain"
+          resizeMode="fit"
         />
         <Text style={styles.title}>Login</Text>
         <TextInput
@@ -81,7 +86,7 @@ function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       ) : (
         <PrimaryButton title="Login" onPress={handleLoginPress} />
       )}
@@ -96,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   content: {
-    width: "60%",
+    width: "70%",
     alignItems: "center",
   },
   logo: {
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 10,
     paddingLeft: 10,
   },
   forgotPasswordLink: {

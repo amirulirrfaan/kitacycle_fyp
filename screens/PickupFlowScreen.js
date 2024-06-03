@@ -18,11 +18,11 @@ const PickupRequestScreen = () => {
   const [selectedCoordinates, setSelectedCoordinates] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [totalWeight, setTotalWeight] = useState(0);
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
 
   const navigation = useNavigation();
   const { user } = useLogin();
 
-  // Calculate total weight whenever selected items change
   useEffect(() => {
     const calculateTotalWeight = () => {
       const total = selectedItems.reduce((sum, item) => sum + item.weight, 0);
@@ -31,12 +31,10 @@ const PickupRequestScreen = () => {
     calculateTotalWeight();
   }, [selectedItems]);
 
-  // Function to handle step change
   const handleStepChange = (stepNumber) => {
     setStep(stepNumber);
   };
 
-  // Function to handle going to the next step
   const nextStep = async () => {
     if (step < 3) {
       if (step === 1) {
@@ -57,6 +55,10 @@ const PickupRequestScreen = () => {
       }
       setStep(step + 1);
     } else {
+      if (!isPaymentSuccessful) {
+        Alert.alert("Payment Required", "Please complete the payment first.");
+        return;
+      }
       try {
         await createPickupRequest();
         navigation.navigate("Success");
@@ -84,7 +86,7 @@ const PickupRequestScreen = () => {
       pickupTime: selectedTime,
       coordinates: selectedCoordinates,
       address: selectedAddress,
-      totalWeight: totalWeight, // Ensure totalWeight is included here
+      totalWeight: totalWeight,
     };
 
     const response = await axios.post(
@@ -96,6 +98,10 @@ const PickupRequestScreen = () => {
 
   const handleValidation = (valid) => {
     setIsValid(valid);
+  };
+
+  const handlePaymentSuccess = () => {
+    setIsPaymentSuccessful(true);
   };
 
   const customStyles = {
@@ -160,11 +166,19 @@ const PickupRequestScreen = () => {
           address={selectedAddress}
           coordinates={selectedCoordinates}
           totalPickupWeight={totalWeight}
+          onPaymentSuccess={handlePaymentSuccess}
         />
       )}
 
-      {/* Next/Confirm Button */}
-      <TouchableOpacity style={styles.buttonContainer} onPress={nextStep}>
+      <TouchableOpacity
+        style={[
+          styles.buttonContainer,
+          !isPaymentSuccessful &&
+            step === 3 && { backgroundColor: Colors.grey },
+        ]}
+        onPress={nextStep}
+        disabled={step === 3 && !isPaymentSuccessful}
+      >
         <View>
           <Text style={styles.buttonText}>
             {step === 3 ? "Confirm" : "Next"}

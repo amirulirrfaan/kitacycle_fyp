@@ -1,27 +1,32 @@
-import { View, StyleSheet, Image, Text, FlatList } from "react-native";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  FlatList,
+  Linking,
+  TouchableOpacity,
+} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
 import * as Location from "expo-location";
-import { markers } from "../assets/markers";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapViewDirections from "react-native-maps-directions";
+import axios from "axios";
 import GOOGLE_API_KEY from "../google_api_key";
 import Colors from "../constants/Colors";
+import { FontAwesome } from "@expo/vector-icons";
 
 const RecycleCenterLocatorScreen = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [initialRegion, setInitialRegion] = useState(null);
+  const [recycleCenters, setRecycleCenters] = useState([]);
+  const [selectedCenter, setSelectedCenter] = useState(null);
   const snapPoints = useMemo(() => ["25%", "50%", "70%"], []);
   const bottomSheetRef = useRef(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -44,8 +49,57 @@ const RecycleCenterLocatorScreen = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    const fetchRecycleCenters = async () => {
+      try {
+        const response = await axios.get(
+          "http://172.20.10.14:8000/getRecycleCenter"
+        );
+        setRecycleCenters(response.data);
+      } catch (error) {
+        console.error("Error fetching recycle centers: ", error);
+      }
+    };
+
+    fetchRecycleCenters();
+  }, []);
+
+  const handleNavigation = (latitude, longitude) => {
+    const url = `http://maps.google.com/maps?daddr=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
+
+  const handleCenterSelect = (center) => {
+    setSelectedCenter(center);
+    fitToCoordinates(center);
+  };
+
+  const fitToCoordinates = (center) => {
+    if (location && mapRef.current) {
+      mapRef.current.fitToCoordinates(
+        [
+          {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+          {
+            latitude: center.coordinate.latitude,
+            longitude: center.coordinate.longitude,
+          },
+        ],
+        {
+          edgePadding: { top: 100, right: 100, bottom: 100, left: 100 },
+          animated: true,
+        }
+      );
+    }
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => handleCenterSelect(item)}
+    >
       <View style={styles.itemInfo}>
         <View style={styles.itemText}>
           <Text style={styles.title}>{item.title}</Text>
@@ -53,31 +107,42 @@ const RecycleCenterLocatorScreen = () => {
         </View>
         <Text style={styles.distance}>{item.distance} km</Text>
       </View>
-    </View>
+      <TouchableOpacity
+        style={styles.navigateLinkContainer}
+        onPress={() =>
+          handleNavigation(item.coordinate.latitude, item.coordinate.longitude)
+        }
+      >
+        <FontAwesome name="location-arrow" size={24} color={Colors.primary} />
+        <Text style={styles.navigateLink}>Go to Location</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
   );
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
         showsUserLocation={true}
         showsMyLocationButton={true}
       >
-        <MapViewDirections
-          origin={initialRegion}
-          destination={markers[0].coordinate}
-          strokeWidth={3}
-          apikey={GOOGLE_API_KEY}
-        />
-        {markers.map((marker) => (
+        {selectedCenter && (
+          <MapViewDirections
+            origin={initialRegion}
+            destination={selectedCenter.coordinate}
+            strokeWidth={3}
+            apikey={GOOGLE_API_KEY}
+          />
+        )}
+        {recycleCenters.map((center) => (
           <Marker
-            key={marker.id}
-            coordinate={marker.coordinate}
-            title={marker.title}
-            description={marker.description}
-            distance={marker.distance + "km"}
+            key={center._id}
+            coordinate={center.coordinate}
+            title={center.title}
+            description={center.description}
           >
             <Image
               source={require("../assets/images/recyclingCenter.png")}
@@ -94,10 +159,11 @@ const RecycleCenterLocatorScreen = () => {
           <View style={[style, styles.bottomSheetBackground]} />
         )}
       >
-        <FlatList
-          data={markers}
+        <BottomSheetFlatList
+          data={recycleCenters}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item._id.toString()}
+          contentContainerStyle={styles.contentContainer}
         />
       </BottomSheet>
     </GestureHandlerRootView>
@@ -116,6 +182,9 @@ const styles = StyleSheet.create({
   bottomSheetBackground: {
     backgroundColor: "white",
     flex: 1,
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
   },
   item: {
     padding: 20,
@@ -136,9 +205,23 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
+    color: Colors.grey,
   },
   distance: {
     fontSize: 14,
     fontWeight: "bold",
+  },
+  navigateLinkContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.secondary,
+    width: 150,
+    marginTop: 10,
+    padding: 5,
+    borderRadius: 5,
+  },
+  navigateLink: {
+    color: Colors.primary,
+    marginLeft: 10,
   },
 });

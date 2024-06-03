@@ -8,9 +8,7 @@ export const loginUser = async (email, password) => {
     return response.data;
   } catch (error) {
     console.log("API login error: ", error.response?.data);
-    throw new Error(
-      error.response?.data?.message || "An error occurred during login."
-    );
+    throw new Error(error.response?.data?.message);
   }
 };
 

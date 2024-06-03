@@ -6,6 +6,7 @@ import LoginProvider, { useLogin } from "./context/LoginProvider";
 import MainNavigator from "./navigation/mainNavigator";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StripeProvider } from "@stripe/stripe-react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const InitializeLoginStatus = () => {
   const { setIsLoggedIn } = useLogin();
@@ -35,10 +36,12 @@ export default function App() {
       <LoginProvider>
         <SafeAreaProvider>
           <SafeAreaView style={styles.safeArea}>
-            <NavigationContainer>
-              <InitializeLoginStatus />
-              <MainNavigator />
-            </NavigationContainer>
+            <GestureHandlerRootView>
+              <NavigationContainer>
+                <InitializeLoginStatus />
+                <MainNavigator />
+              </NavigationContainer>
+            </GestureHandlerRootView>
           </SafeAreaView>
         </SafeAreaProvider>
       </LoginProvider>

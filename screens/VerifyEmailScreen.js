@@ -11,6 +11,7 @@ import {
 import PrimaryButton from "../components/PrimaryButton";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 const VerifyEmailScreen = ({ route }) => {
   const { email } = route.params;
@@ -49,7 +50,8 @@ const VerifyEmailScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Verify Email</Text>
+      <Text style={styles.title}>Enter Verification Code</Text>
+      <Text style={styles.message}>Please enter code sent to your email.</Text>
       <TextInput
         style={styles.input}
         placeholder="Verification Code"
@@ -57,9 +59,11 @@ const VerifyEmailScreen = ({ route }) => {
         onChangeText={setVerificationCode}
       />
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       ) : (
-        <PrimaryButton title="Verify" onPress={handleVerifyPress} />
+        <View style={styles.buttonContainer}>
+          <PrimaryButton title="Verify" onPress={handleVerifyPress} />
+        </View>
       )}
     </View>
   );
@@ -77,6 +81,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: "center",
   },
+  message: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
   input: {
     height: 50,
     borderWidth: 1,
@@ -84,6 +93,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     paddingLeft: 10,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: "center",
   },
 });
 

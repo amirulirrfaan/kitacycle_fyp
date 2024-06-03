@@ -11,20 +11,20 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Colors from "../constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLogin } from "../context/LoginProvider";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {
   const { setIsLoggedIn, user } = useLogin();
+  const navigation = useNavigation();
 
   const handleLogout = async () => {
     try {
       // Clear authentication and user state
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
-
-      // Optionally, clear other relevant state
       setIsLoggedIn(false);
+      navigation.replace("Login");
     } catch (error) {
       console.error("Failed to logout:", error);
     }
@@ -46,13 +46,10 @@ const ProfileScreen = () => {
               />
             </View>
             <Text style={styles.name}>{user.name}</Text>
-            <Text style={styles.phoneNumber}>123-456-7890</Text>
           </View>
         </LinearGradient>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <OptionItem onPress={"te"} icon="clock-o" text="Pickup History" />
-        <OptionItem onPress={"te"} icon="bell" text="Notifications" />
         <OptionItem onPress={"te"} icon="user" text="My Profile" />
         <OptionItem onPress={"te"} icon="lock" text="Change Password" />
         <OptionItem onPress={handleLogout} icon="sign-out" text="Logout" />

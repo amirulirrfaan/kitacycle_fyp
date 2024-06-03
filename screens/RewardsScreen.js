@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,17 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
+  RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors"; // Assuming you have a Colors file for your color constants
 import { useLogin } from "../context/LoginProvider";
 import axios from "axios";
+import BottomSheet from "@gorhom/bottom-sheet";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import LottieView from "lottie-react-native";
 
 const HEADER_MAX_HEIGHT = 200;
 const HEADER_MIN_HEIGHT = 60;
@@ -19,39 +25,66 @@ const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 const RewardsTab = () => {
   const { user, setUser } = useLogin();
-  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedReward, setSelectedReward] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const bottomSheetRef = useRef(null);
+  const confettiAnimation = useRef(null);
 
   useEffect(() => {
-    const fetchRewards = async () => {
-      try {
-        const response = await axios.get("http://172.20.10.14:8000/getRewards");
-        setRewards(response.data);
-      } catch (error) {
-        console.error("Error fetching rewards data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRewards();
   }, []);
 
-  const handleRedeemReward = async (rewardId, cost) => {
+  const fetchRewards = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://172.20.10.14:8000/getRewards");
+      setRewards(response.data);
+    } catch (error) {
+      console.error("Error fetching rewards data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchRewards();
+    setRefreshing(false);
+  };
+
+  const handleRedeemReward = async () => {
+    if (user.points < selectedReward.cost) {
+      Alert.alert(
+        "Insufficient Balance",
+        "You do not have enough points to redeem this reward."
+      );
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://172.20.10.14:8000/redeemReward",
         {
           userId: user._id,
-          rewardId,
+          rewardId: selectedReward._id,
         }
       );
 
       if (response.data.message === "Reward redeemed successfully.") {
-        console.log(`Redeemed reward with ID: ${rewardId} for ${cost} points`);
+        console.log(
+          `Redeemed reward with ID: ${selectedReward._id} for ${selectedReward.cost} points`
+        );
         // Update UI or state to reflect the new points and redeemed reward
         setUser({ ...user, points: response.data.points });
+        bottomSheetRef.current?.close();
+        setShowConfetti(true);
+        confettiAnimation.current.play();
+        setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
+        await fetchRewards(); // Refresh rewards list if necessary
       } else {
         console.error("Failed to redeem reward:", response.data.message);
       }
@@ -61,22 +94,22 @@ const RewardsTab = () => {
   };
 
   const renderRewardItem = ({ item }) => (
-    <View style={styles.rewardContainer}>
+    <TouchableOpacity
+      style={styles.rewardContainer}
+      onPress={() => {
+        setSelectedReward(item);
+        bottomSheetRef.current?.expand();
+      }}
+    >
       <Image source={{ uri: item.image }} style={styles.rewardImage} />
       <View style={styles.rewardDetails}>
         <Text style={styles.rewardTitle}>{item.title}</Text>
         <Text style={styles.rewardDescription}>{item.description}</Text>
         <View style={styles.rewardFooter}>
           <Text style={styles.rewardCost}>{item.cost} pts</Text>
-          <TouchableOpacity
-            style={styles.redeemButton}
-            onPress={() => handleRedeemReward(item._id, item.cost)}
-          >
-            <Text style={styles.buttonText}>Redeem</Text>
-          </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const headerHeight = scrollY.interpolate({
@@ -112,7 +145,7 @@ const RewardsTab = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <Animated.FlatList
         data={rewards}
         keyExtractor={(item) => item._id}
@@ -123,6 +156,9 @@ const RewardsTab = () => {
           { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
       <Animated.View style={[styles.header, { height: headerHeight }]}>
         <LinearGradient
@@ -154,7 +190,45 @@ const RewardsTab = () => {
           </Animated.View>
         </LinearGradient>
       </Animated.View>
-    </View>
+
+      <BottomSheet ref={bottomSheetRef} snapPoints={["50%", "70%"]} index={-1}>
+        {selectedReward && (
+          <View style={styles.bottomSheetContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => bottomSheetRef.current?.close()}
+            >
+              <Ionicons name="close" size={24} color="black" />
+            </TouchableOpacity>
+            <Image
+              source={{ uri: selectedReward.image }}
+              style={styles.rewardImageLarge}
+            />
+            <Text style={styles.rewardTitle}>{selectedReward.title}</Text>
+            <Text style={styles.rewardDescription}>
+              {selectedReward.description}
+            </Text>
+            <Text style={styles.rewardCost}>{selectedReward.cost} pts</Text>
+            <TouchableOpacity
+              style={styles.redeemButton}
+              onPress={handleRedeemReward}
+            >
+              <Text style={styles.buttonText}>Redeem</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </BottomSheet>
+
+      {showConfetti && (
+        <LottieView
+          ref={confettiAnimation}
+          source={require("../assets/animations/confetti.json")}
+          autoPlay={true}
+          loop={false}
+          style={styles.confetti}
+        />
+      )}
+    </GestureHandlerRootView>
   );
 };
 
@@ -219,6 +293,12 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 15,
   },
+  rewardImageLarge: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
   rewardDetails: {
     flex: 1,
   },
@@ -242,9 +322,10 @@ const styles = StyleSheet.create({
   },
   redeemButton: {
     backgroundColor: "#4CAF50",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
@@ -254,6 +335,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  bottomSheetContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  closeButton: {
+    alignSelf: "flex-end",
+    marginRight: 20,
+    marginTop: 10,
+  },
+  confetti: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
   },
 });
 
