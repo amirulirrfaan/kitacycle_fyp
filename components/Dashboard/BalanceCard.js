@@ -13,7 +13,7 @@ function BalanceCard(props) {
         </View>
       </View>
       <ImageBackground
-        source={require("/Users/irrfaan/Documents/FYP/kitacycle_fyp/assets/images/recycleBg.png")}
+        source={require("../../assets/images/recycleBg.png")}
         resizeMode="contain"
         style={styles.imageBackground}
       />

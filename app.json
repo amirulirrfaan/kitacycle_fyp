@@ -6,13 +6,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "/Users/irrfaan/Documents/FYP/kitacycle_fyp/assets/images/KitaCycle.png",
+      "image": "./assets/images/KitaCycle.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "config": {
@@ -21,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/K.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.irrfaan.kitacycle_fyp"
@@ -29,9 +27,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-secure-store"],
     "extra": {
       "eas": {
         "projectId": "53889054-38c2-4da3-a78c-4dda550967a5"
