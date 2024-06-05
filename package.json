@@ -16,7 +16,7 @@
     "@react-navigation/native-stack": "^6.9.20",
     "@stripe/stripe-react-native": "0.37.2",
     "axios": "^1.6.7",
-    "expo": "^51.0.8",
+    "expo": "~51.0.9",
     "expo-image-picker": "~15.0.5",
     "expo-linear-gradient": "~13.0.2",
     "expo-location": "~17.0.1",
@@ -37,7 +37,7 @@
     "react-native-screens": "3.31.1",
     "react-native-simple-bottom-sheet": "^1.0.4",
     "react-native-step-indicator": "^1.0.3",
-    "react-native-svg": "^15.3.0",
+    "react-native-svg": "15.2.0",
     "react-native-swiper": "^1.6.0",
     "react-native-tab-view": "^3.5.2",
     "socket.io-client": "^4.7.5"
