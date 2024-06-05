@@ -21,7 +21,9 @@ const SelectItemScreen = ({ setSelectedItems }) => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get("http://172.20.10.14:8000/getItem");
+      const response = await axios.get(
+        "https://kitacycle-backend.onrender.com/getItem"
+      );
       const fetchedItems = response.data.map((item) => ({
         ...item,
         weight: 0,
@@ -38,7 +40,7 @@ const SelectItemScreen = ({ setSelectedItems }) => {
         <Image source={{ uri: item.image }} style={styles.itemImage} />
         <View style={styles.itemText}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemPrice}>RM{item.price.toFixed(2)}/kg</Text>
+          {/* <Text style={styles.itemPrice}>RM{item.price.toFixed(2)}/kg</Text> */}
         </View>
       </View>
       <View style={styles.weightContainer}>
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   itemName: {
-    fontSize: 16,
+    fontSize: 13,
   },
   itemPrice: {
     fontSize: 14,

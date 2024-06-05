@@ -28,7 +28,7 @@ const VerifyEmailScreen = ({ route }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://172.20.10.14:8000/verifyEmail",
+        "https://kitacycle-backend.onrender.com/verifyEmail",
         {
           email,
           verificationCode,

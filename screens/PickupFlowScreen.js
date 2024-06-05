@@ -90,7 +90,7 @@ const PickupRequestScreen = () => {
     };
 
     const response = await axios.post(
-      "http://172.20.10.14:8000/createPickup",
+      "https://kitacycle-backend.onrender.com/createPickup",
       pickupData
     );
     return response.data;

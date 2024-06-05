@@ -1,33 +1,40 @@
-// ForgotPasswordScreen.js
-
 import React, { useState } from "react";
 import {
-  View,
   Text,
+  View,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  ActivityIndicator,
   Alert,
 } from "react-native";
+import PrimaryButton from "../components/PrimaryButton";
 import axios from "axios";
+import Colors from "../constants/Colors";
 
-const ForgotPasswordScreen = () => {
+function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = async () => {
+  const handleForgotPasswordPress = async () => {
+    if (!email) {
+      Alert.alert("Input Required", "Please enter your email.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const res = await axios.post("http://172.20.10.14:8000/forgotPassword", {
-        email,
-      });
-
-      if (res.data.success) {
-        Alert.alert("Password Reset Email Sent", res.data.message);
-      } else {
-        Alert.alert("Password Reset Failed", res.data.message);
-      }
+      const response = await axios.post(
+        "https://kitacycle-backend.onrender.com/user/forgotPassword",
+        { email }
+      );
+      Alert.alert("Success", "Password reset email sent.");
+      navigation.navigate("Login");
     } catch (error) {
-      console.error("Error resetting password:", error);
-      Alert.alert("Password Reset Failed", "An error occurred.");
+      Alert.alert("Error", error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,50 +43,42 @@ const ForgotPasswordScreen = () => {
       <Text style={styles.title}>Forgot Password</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
+        placeholder="Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
         autoCapitalize="none"
       />
-      <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-        <Text style={styles.buttonText}>Reset Password</Text>
-      </TouchableOpacity>
+      {loading ? (
+        <ActivityIndicator size="large" color={Colors.primary} />
+      ) : (
+        <PrimaryButton
+          title="Send Reset Email"
+          onPress={handleForgotPasswordPress}
+        />
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 20,
   },
   input: {
-    width: "100%",
+    width: "80%",
     height: 50,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  button: {
-    backgroundColor: "blue",
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
+    paddingLeft: 10,
   },
 });
 

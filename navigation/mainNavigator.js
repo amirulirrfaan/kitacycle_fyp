@@ -12,7 +12,6 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import DriverMapScreen from "../screens/DriverMapScreen";
-import FindingDriverScreen from "../screens/FindingDriverScreen";
 import PickupFlowScreen from "../screens/PickupFlowScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import CollectorTrackingScreen from "../screens/CollectorTrackingScreen";
@@ -49,7 +48,6 @@ const AppStack = () => (
       name="RecycleCenterLocator"
       component={RecycleCenterLocatorScreen}
     />
-    <Stack.Screen name="FindingDriver" component={FindingDriverScreen} />
     <Stack.Screen name="DriverMap" component={DriverMapScreen} />
     <Stack.Screen name="PickupFlow" component={PickupFlowScreen} />
     <Stack.Screen name="Notification" component={NotificationScreen} />

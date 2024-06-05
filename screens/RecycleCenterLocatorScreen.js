@@ -53,9 +53,9 @@ const RecycleCenterLocatorScreen = () => {
     const fetchRecycleCenters = async () => {
       try {
         const response = await axios.get(
-          "http://172.20.10.14:8000/getRecycleCenter"
+          "https://kitacycle-backend.onrender.com/recycleCenter/all"
         );
-        setRecycleCenters(response.data);
+        setRecycleCenters(response.data.recycleCenters);
       } catch (error) {
         console.error("Error fetching recycle centers: ", error);
       }

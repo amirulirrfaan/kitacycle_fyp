@@ -43,7 +43,7 @@ const CheckOutScreen = ({
       try {
         // Fetch the payment intent client secret from your backend
         const response = await fetch(
-          "http://172.20.10.14:8000/create-payment-intent",
+          "https://kitacycle-backend.onrender.com/create-payment-intent",
           {
             method: "POST",
             headers: {

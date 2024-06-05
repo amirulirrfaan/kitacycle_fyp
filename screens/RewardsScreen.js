@@ -41,8 +41,11 @@ const RewardsTab = () => {
   const fetchRewards = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://172.20.10.14:8000/getRewards");
-      setRewards(response.data);
+      const response = await axios.get(
+        "https://kitacycle-backend.onrender.com/rewards/all"
+      );
+      console.log("Fetched rewards data:", response.data);
+      setRewards(response.data.rewards);
     } catch (error) {
       console.error("Error fetching rewards data:", error);
     } finally {
@@ -67,7 +70,7 @@ const RewardsTab = () => {
 
     try {
       const response = await axios.post(
-        "http://172.20.10.14:8000/redeemReward",
+        "https://kitacycle-backend.onrender.com/redeemReward",
         {
           userId: user._id,
           rewardId: selectedReward._id,

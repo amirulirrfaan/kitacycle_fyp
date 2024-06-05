@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import io from "socket.io-client";
 import { useLogin } from "../context/LoginProvider";
 
-const socket = io("http://172.20.10.14:8000");
+const socket = io("https://kitacycle-backend.onrender.com");
 
 const useSocket = () => {
   const { user } = useLogin();

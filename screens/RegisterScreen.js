@@ -80,12 +80,15 @@ const RegisterScreen = () => {
     setLoading(true);
     setBackendErrors({});
     try {
-      const response = await axios.post("http://172.20.10.14:8000/register", {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
+      const response = await axios.post(
+        "https://kitacycle-backend.onrender.com/register",
+        {
+          name,
+          email,
+          password,
+          confirmPassword,
+        }
+      );
 
       console.log("Registration response:", response.data);
       navigation.navigate("VerifyEmail", { email });

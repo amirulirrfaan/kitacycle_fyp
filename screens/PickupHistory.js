@@ -74,7 +74,7 @@ const OrderList = ({ status }) => {
   const fetchOrders = async () => {
     try {
       const response = await axios.get(
-        `http://172.20.10.14:8000/getUserPickups?user=${user._id}`
+        `https://kitacycle-backend.onrender.com/getUserPickups?user=${user._id}`
       );
       let filteredOrders = response.data;
       if (status === "scheduled") {
