@@ -39,12 +39,7 @@ const ProfileScreen = () => {
           end={{ x: 1, y: 0.5 }}
         >
           <View style={styles.profileContent}>
-            <View style={styles.profileImageContainer}>
-              <Image
-                source={require("../assets/images/uncleRoger.png")}
-                style={styles.profileImage}
-              />
-            </View>
+            <View style={styles.profileImageContainer}></View>
             <Text style={styles.name}>{user.name}</Text>
           </View>
         </LinearGradient>
