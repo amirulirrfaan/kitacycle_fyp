@@ -18,10 +18,9 @@ const HowToRecycleProperly = () => {
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>General Recycling Guidelines</Text>
         <Text style={styles.text}>
-          - Rinse and clean recyclables to remove any food residue.
-          {"\n"}- Remove labels, lids, and caps from containers.
-          {"\n"}- Sort recyclables by material type: plastics, paper, glass, and
-          metals.
+          - Rinse and clean recyclables to remove any food residue.{"\n"}-
+          Remove labels, lids, and caps from containers.{"\n"}- Sort recyclables
+          by material type: plastics, paper, glass, and metals.
         </Text>
       </View>
 
@@ -29,43 +28,72 @@ const HowToRecycleProperly = () => {
         <Text style={styles.sectionHeader}>Material-Specific Recycling</Text>
 
         <View style={styles.materialSection}>
-          <Text style={styles.materialHeader}>Plastics</Text>
+          <View style={styles.materialHeaderContainer}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.materialImage}
+            />
+            <Text style={styles.materialHeader}>Plastics</Text>
+          </View>
           <Text style={styles.text}>
-            - Types of plastics: PET, HDPE, PVC, LDPE, PP, PS, etc.
-            {"\n"}- Accepted items: bottles, containers, jugs, etc.
-            {"\n"}- Tips: Ensure plastics are clean and dry before recycling.
+            - Types of plastics: PET, HDPE, PVC, LDPE, PP, PS, etc.{"\n"}-
+            Accepted items: bottles, containers, jugs, etc.{"\n"}- Tips: Ensure
+            plastics are clean and dry before recycling.
           </Text>
         </View>
 
         <View style={styles.materialSection}>
-          <Text style={styles.materialHeader}>Paper</Text>
+          <View style={styles.materialHeaderContainer}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.materialImage}
+            />
+            <Text style={styles.materialHeader}>Paper</Text>
+          </View>
           <Text style={styles.text}>
-            - Types of paper: newspaper, office paper, cardboard, etc.
-            {"\n"}- Accepted items: newspapers, magazines, boxes, etc.
-            {"\n"}- Tips: Flatten cardboard boxes to save space.
+            - Types of paper: newspaper, office paper, cardboard, etc.{"\n"}-
+            Accepted items: newspapers, magazines, boxes, etc.{"\n"}- Tips:
+            Flatten cardboard boxes to save space.
           </Text>
         </View>
 
         <View style={styles.materialSection}>
-          <Text style={styles.materialHeader}>Glass</Text>
+          <View style={styles.materialHeaderContainer}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.materialImage}
+            />
+            <Text style={styles.materialHeader}>Glass</Text>
+          </View>
           <Text style={styles.text}>
-            - Types of glass: bottles, jars, etc.
-            {"\n"}- Accepted items: glass bottles and jars.
-            {"\n"}- Tips: Rinse glass items and remove lids before recycling.
+            - Types of glass: bottles, jars, etc.{"\n"}- Accepted items: glass
+            bottles and jars.{"\n"}- Tips: Rinse glass items and remove lids
+            before recycling.
           </Text>
         </View>
 
         <View style={styles.materialSection}>
-          <Text style={styles.materialHeader}>Metals</Text>
+          <View style={styles.materialHeaderContainer}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.materialImage}
+            />
+            <Text style={styles.materialHeader}>Metals</Text>
+          </View>
           <Text style={styles.text}>
-            - Types of metals: aluminum, steel, etc.
-            {"\n"}- Accepted items: cans, tins, etc.
-            {"\n"}- Tips: Crush cans to save space.
+            - Types of metals: aluminum, steel, etc.{"\n"}- Accepted items:
+            cans, tins, etc.{"\n"}- Tips: Crush cans to save space.
           </Text>
         </View>
 
         <View style={styles.materialSection}>
-          <Text style={styles.materialHeader}>Electronics</Text>
+          <View style={styles.materialHeaderContainer}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/40" }}
+              style={styles.materialImage}
+            />
+            <Text style={styles.materialHeader}>Electronics</Text>
+          </View>
           <Text style={styles.text}>
             - Types of electronic waste: phones, computers, batteries, etc.
             {"\n"}- Tips: Find local e-waste recycling programs for proper
@@ -94,9 +122,8 @@ const HowToRecycleProperly = () => {
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>Tips for Reducing Waste</Text>
         <Text style={styles.text}>
-          - Use reusable bags, bottles, and containers.
-          {"\n"}- Avoid single-use items.
-          {"\n"}- Compost organic waste.
+          - Use reusable bags, bottles, and containers.{"\n"}- Avoid single-use
+          items.{"\n"}- Compost organic waste.
         </Text>
       </View>
 
@@ -119,29 +146,52 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
+    textAlign: "center",
   },
   section: {
     marginBottom: 20,
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   sectionHeader: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     marginBottom: 10,
+    color: "#444",
   },
   text: {
     fontSize: 16,
     color: "#666",
+    lineHeight: 24,
   },
   materialSection: {
     marginBottom: 15,
   },
-  materialHeader: {
-    fontSize: 18,
-    fontWeight: "bold",
+  materialHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 5,
+  },
+  materialHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#444",
+  },
+  materialImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 5,
+    marginRight: 10,
   },
 });
 

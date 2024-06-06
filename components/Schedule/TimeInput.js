@@ -9,7 +9,7 @@ const TimePicker = ({ label, value, onTimeChange }) => {
 
   const handleConfirmTime = (selectedTime) => {
     setTimePickerVisibility(false);
-    onTimeChange(selectedTime);
+    onTimeChange(selectedTime.toTimeString().split(" ")[0]);
   };
 
   return (
@@ -25,7 +25,7 @@ const TimePicker = ({ label, value, onTimeChange }) => {
           color={Colors.primary}
           style={styles.icon}
         />
-        <Text>{value ? value.toLocaleTimeString() : label}</Text>
+        <Text>{value ? value : label}</Text>
       </TouchableOpacity>
 
       {/* Time Picker Modal */}

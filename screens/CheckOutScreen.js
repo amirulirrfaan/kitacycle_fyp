@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import Colors from "../constants/Colors";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 const CheckOutScreen = ({
   items = [],
@@ -33,8 +33,13 @@ const CheckOutScreen = ({
 
   const formatTime = (time) => {
     if (!time) return "No time selected";
+    const [hours, minutes, seconds] = time.split(":");
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(seconds);
     const options = { hour: "2-digit", minute: "2-digit" };
-    return new Date(time).toLocaleTimeString(undefined, options);
+    return date.toLocaleTimeString(undefined, options);
   };
 
   const handlePaymentMethodSelect = async (method) => {
@@ -56,24 +61,28 @@ const CheckOutScreen = ({
         const { clientSecret } = await response.json();
 
         // Initialize the payment sheet
-        const { error } = await stripe.initPaymentSheet({
+        const { error: initError } = await stripe.initPaymentSheet({
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: "KitaCycle",
         });
 
-        if (!error) {
-          // Open the payment sheet
-          const { error: paymentError } = await stripe.presentPaymentSheet();
+        if (initError) {
+          Alert.alert(
+            "Error",
+            `Failed to initialize payment sheet: ${initError.message}`
+          );
+          return;
+        }
 
-          if (paymentError) {
-            Alert.alert("Payment failed", paymentError.message);
-          } else {
-            setIsPaymentSuccessful(true);
-            Alert.alert("Payment successful", "Your payment was successful!");
-            onPaymentSuccess();
-          }
+        // Open the payment sheet
+        const { error: paymentError } = await stripe.presentPaymentSheet();
+
+        if (paymentError) {
+          Alert.alert("Payment failed", paymentError.message);
         } else {
-          Alert.alert("Error", error.message);
+          setIsPaymentSuccessful(true);
+          Alert.alert("Payment successful", "Your payment was successful!");
+          onPaymentSuccess();
         }
       } catch (error) {
         Alert.alert("Error", "Failed to initialize payment sheet");
@@ -101,11 +110,22 @@ const CheckOutScreen = ({
         </View>
       </View>
 
+      <Text style={styles.summaryTitle}>Booking Summary</Text>
       <View style={styles.summaryContainer}>
-        <Text style={styles.summaryTitle}>Booking Summary</Text>
-        <Text style={styles.summaryText}>Date: {formatDate(date)}</Text>
-        <Text style={styles.summaryText}>Time: {formatTime(time)}</Text>
-        <Text style={styles.summaryText}>Address: {address}</Text>
+        <View style={styles.summaryRow}>
+          <Ionicons name="calendar" size={24} color={Colors.primary} />
+          <Text style={styles.summaryText}>Date: {formatDate(date)}</Text>
+        </View>
+        <View style={styles.separator} />
+        <View style={styles.summaryRow}>
+          <Ionicons name="time" size={24} color={Colors.primary} />
+          <Text style={styles.summaryText}>Time: {formatTime(time)}</Text>
+        </View>
+        <View style={styles.separator} />
+        <View style={styles.summaryRow}>
+          <Ionicons name="location" size={24} color={Colors.primary} />
+          <Text style={styles.summaryText}>Address: {address}</Text>
+        </View>
       </View>
 
       <View style={styles.paymentContainer}>
@@ -190,21 +210,29 @@ const styles = StyleSheet.create({
     color: "green",
   },
   summaryContainer: {
-    marginTop: 20,
     padding: 10,
     backgroundColor: "#fff",
     borderRadius: 8,
     borderColor: "#ccc",
-    borderWidth: 1,
   },
   summaryTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    marginVertical: 10,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   summaryText: {
     fontSize: 16,
-    marginBottom: 5,
+    marginLeft: 10,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginVertical: 10,
   },
   paymentContainer: {
     marginTop: 20,

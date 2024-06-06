@@ -22,6 +22,8 @@ import OnboardingScreen from "../screens/OnboardingScreen";
 import Colors from "../constants/Colors";
 import HowToRecycleProperly from "../screens/HowToRecycleProperly";
 import RecyclingQuiz from "../screens/RecyclingQuiz";
+import EditProfileScreen from "../screens/EditProfileScreen";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +59,8 @@ const AppStack = () => (
     />
     <Stack.Screen name="HowToRecycle" component={HowToRecycleProperly} />
     <Stack.Screen name="Quiz" component={RecyclingQuiz} />
+    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
   </Stack.Navigator>
 );
 

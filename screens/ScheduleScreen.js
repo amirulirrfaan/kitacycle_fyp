@@ -3,9 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   Alert,
   Switch,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -39,16 +40,12 @@ const ScheduleScreen = ({ onValidate, onSchedule }) => {
 
         setCoordinates({ type: "Point", coordinates: [longitude, latitude] });
 
-        // Perform reverse geocoding to get the address
         const response = await axios.get(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
         );
 
-        // Extract the formatted address from the response
         const formattedAddress = response.data.results[0].formatted_address;
-
         setAddress(formattedAddress);
-
         Alert.alert("Location obtained", `Address: ${formattedAddress}`);
       } catch (error) {
         Alert.alert("Error", "Failed to get current location");
@@ -61,7 +58,7 @@ const ScheduleScreen = ({ onValidate, onSchedule }) => {
   };
 
   useEffect(() => {
-    const isValid = !!coordinates && !!address;
+    const isValid = !!coordinates && !!address && !!date && !!time;
     onValidate(isValid);
     onSchedule(date, time, coordinates, address);
   }, [coordinates, address, date, time, onValidate, onSchedule]);

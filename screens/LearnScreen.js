@@ -14,17 +14,17 @@ const articles = [
   {
     id: "1",
     title: "The Importance of Recycling",
-    image: "link_to_image",
+    image: "https://via.placeholder.com/100",
   },
   {
     id: "2",
     title: "How Recycling Helps the Environment",
-    image: "link_to_image",
+    image: "https://via.placeholder.com/100",
   },
   {
     id: "3",
     title: "Recycling Tips for Beginners",
-    image: "link_to_image",
+    image: "https://via.placeholder.com/100",
   },
   // Add more articles as needed
 ];
@@ -43,7 +43,10 @@ const LearnScreen = () => {
           onPress={() => navigation.navigate("HowToRecycle")}
         >
           <Text style={styles.cardTitle}>How to Recycle Properly</Text>
-          <Image source={{ uri: "link_to_image" }} style={styles.cardImage} />
+          <Image
+            source={{ uri: "https://via.placeholder.com/100" }}
+            style={styles.cardImage}
+          />
         </TouchableOpacity>
         {/* Add more tips and guides */}
       </View>
@@ -55,7 +58,10 @@ const LearnScreen = () => {
           onPress={() => navigation.navigate("Quiz")}
         >
           <Text style={styles.cardTitle}>Take a Recycling Quiz</Text>
-          <Image source={{ uri: "link_to_image" }} style={styles.cardImage} />
+          <Image
+            source={{ uri: "https://via.placeholder.com/100" }}
+            style={styles.cardImage}
+          />
         </TouchableOpacity>
         {/* Add more interactive content */}
       </View>
@@ -88,73 +94,77 @@ const LearnScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F9FA",
     padding: 20,
   },
   header: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
   },
   section: {
     marginBottom: 20,
   },
   sectionHeader: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
+    color: "#555",
     marginBottom: 10,
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 12,
+    padding: 20,
     marginBottom: 15,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     flex: 1,
+    color: "#444",
   },
   cardImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
+    width: 60,
+    height: 60,
+    borderRadius: 10,
   },
   articleList: {
-    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   articleCard: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
-    width: 150,
-    height: 150,
+    borderRadius: 12,
+    padding: 15,
+    marginRight: 15,
+    width: 180,
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   articleImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 5,
+    width: 120,
+    height: 120,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   articleTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+    color: "#444",
   },
 });
 

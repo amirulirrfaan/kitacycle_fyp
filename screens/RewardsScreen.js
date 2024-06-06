@@ -69,8 +69,10 @@ const RewardsTab = () => {
     }
 
     try {
+      console.log(selectedReward._id);
+      console.log(user._id);
       const response = await axios.post(
-        "https://kitacycle-backend.onrender.com/redeemReward",
+        "http://172.20.10.14:8000/rewards/redeemReward",
         {
           userId: user._id,
           rewardId: selectedReward._id,
@@ -83,11 +85,14 @@ const RewardsTab = () => {
         );
         // Update UI or state to reflect the new points and redeemed reward
         setUser({ ...user, points: response.data.points });
-        bottomSheetRef.current?.close();
         setShowConfetti(true);
         confettiAnimation.current.play();
-        setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
-        await fetchRewards(); // Refresh rewards list if necessary
+        setTimeout(() => {
+          setShowConfetti(false);
+          bottomSheetRef.current?.close();
+          // Refresh rewards list after confetti animation
+          // fetchRewards();
+        }, 3000); // Hide confetti after 3 seconds
       } else {
         console.error("Failed to redeem reward:", response.data.message);
       }

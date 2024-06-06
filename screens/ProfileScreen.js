@@ -1,12 +1,12 @@
+import React from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  Image,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
-import { React, useState, useEffect } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Colors from "../constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,24 +29,40 @@ const ProfileScreen = () => {
       console.error("Failed to logout:", error);
     }
   };
+
+  const handleEditProfile = () => {
+    navigation.navigate("EditProfile");
+  };
+
+  const handleChangePassword = () => {
+    navigation.navigate("ChangePassword");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
         <LinearGradient
           colors={[Colors.gradientOne, Colors.gradientTwo]}
-          style={styles.header}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0.5 }}
+          style={styles.overlay}
         >
           <View style={styles.profileContent}>
-            <View style={styles.profileImageContainer}></View>
+            <Text style={styles.welcomeText}>Welcome,</Text>
             <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
           </View>
         </LinearGradient>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <OptionItem onPress={"te"} icon="user" text="My Profile" />
-        <OptionItem onPress={"te"} icon="lock" text="Change Password" />
+        <OptionItem
+          onPress={handleEditProfile}
+          icon="user"
+          text="Edit Profile"
+        />
+        <OptionItem
+          onPress={handleChangePassword}
+          icon="lock"
+          text="Change Password"
+        />
         <OptionItem onPress={handleLogout} icon="sign-out" text="Logout" />
       </ScrollView>
     </View>
@@ -74,31 +90,33 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
   },
   profileContent: {
     alignItems: "center",
     paddingVertical: 20,
   },
-  profileImageContainer: {
-    borderWidth: 5,
-    borderColor: "white",
-    borderRadius: 50,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  welcomeText: {
+    fontSize: 20,
+    color: "white",
+    marginBottom: 5,
   },
   name: {
-    marginTop: 10,
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     color: "white",
   },
-  phoneNumber: {
-    marginTop: 5,
+  email: {
     fontSize: 16,
     color: "white",
+    marginTop: 5,
   },
   scrollContainer: {
     flexGrow: 1,

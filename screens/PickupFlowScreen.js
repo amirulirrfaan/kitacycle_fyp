@@ -35,6 +35,19 @@ const PickupRequestScreen = () => {
     setStep(stepNumber);
   };
 
+  const isDateTimeValid = (date, time) => {
+    if (!date || !time) {
+      return false;
+    }
+
+    const selectedDateTime = new Date(date);
+    const [hours, minutes] = time.split(":").map(Number);
+    selectedDateTime.setHours(hours, minutes);
+
+    const currentDateTime = new Date();
+    return selectedDateTime > currentDateTime;
+  };
+
   const nextStep = async () => {
     if (step < 3) {
       if (step === 1) {
@@ -46,12 +59,22 @@ const PickupRequestScreen = () => {
           );
           return;
         }
-      } else if (step === 2 && !isValid) {
-        Alert.alert(
-          "Validation Error",
-          "Please provide a valid address or use your current location."
-        );
-        return;
+      } else if (step === 2) {
+        if (!isValid) {
+          Alert.alert(
+            "Validation Error",
+            "Please provide a valid address or use your current location."
+          );
+          return;
+        }
+
+        if (!isDateTimeValid(selectedDate, selectedTime)) {
+          Alert.alert(
+            "Validation Error",
+            "The pickup date and time cannot be in the past."
+          );
+          return;
+        }
       }
       setStep(step + 1);
     } else {
