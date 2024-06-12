@@ -8,64 +8,13 @@ import {
   Image,
   FlatList,
   Animated,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import WaveAnimation from "../components/WaveAnimation";
 import Colors from "../constants/Colors";
-import axios from "axios"; // Ensure axios is installed
-
-const articles = [
-  {
-    id: "1",
-    title: "The Importance of Recycling",
-    image: "https://storage.googleapis.com/kitacycle/important.png",
-    content: `
-      Recycling is crucial for the environment and helps conserve resources, reduce landfill waste, and lower greenhouse gas emissions. Here are some reasons why recycling is important:
-
-      1. Conservation of Natural Resources:** Recycling reduces the need to extract, refine, and process raw materials, which helps conserve natural resources like timber, water, and minerals.
-      2. Reduction of Pollution:** Recycling reduces the pollution caused by waste, as manufacturing products from recycled materials generally creates less pollution than making them from new raw materials.
-      3. Energy Savings:** Recycling often requires less energy than producing new products from raw materials. For example, recycling aluminum saves up to 95% of the energy needed to produce new aluminum from bauxite ore.
-      4. Economic Benefits:** Recycling can create jobs and stimulate economic growth. The recycling industry provides employment opportunities and contributes to the economy.
-      5. Landfill Space:** Recycling helps reduce the amount of waste sent to landfills, thereby conserving space and reducing the environmental impact of landfills.
-
-      By recycling, we can all contribute to a healthier and more sustainable planet.
-    `,
-  },
-  {
-    id: "2",
-    title: "How Recycling Helps the Environment",
-    image: "https://storage.googleapis.com/kitacycle/environment.png",
-    content: `
-      Recycling has a significant positive impact on the environment. Here's how:
-
-      1.  Reduction of Greenhouse Gas Emissions: Recycling helps reduce the amount of waste sent to landfills and incinerators, which in turn reduces the greenhouse gases emitted from these sites.
-      2.  Conservation of Resources: Recycling conserves natural resources such as water, minerals, and timber by reusing materials instead of extracting new raw materials.
-      3.  Energy Conservation: Manufacturing products from recycled materials often requires less energy compared to using raw materials. For example, recycling paper saves about 65% of the energy needed to produce new paper.
-      4.  Reduction in Pollution: Recycling reduces pollution by minimizing the need for extracting and processing raw materials, which can result in air and water pollution.
-      5.  Wildlife Protection: Recycling helps preserve ecosystems and wildlife habitats by reducing the need for mining, logging, and other activities that disrupt natural environments.
-
-      Overall, recycling is a simple yet effective way to protect the environment and promote sustainability.
-    `,
-  },
-  {
-    id: "3",
-    title: "Recycling Tips for Beginners",
-    image: "https://storage.googleapis.com/kitacycle/tips.png",
-    content: `
-      If you're new to recycling, here are some tips to help you get started:
-
-      1. Understand What Can Be Recycled: Familiarize yourself with the materials that can be recycled in your area. Common recyclable items include paper, cardboard, glass, plastic bottles, and aluminum cans.
-      2. Separate Your Waste: Set up separate bins for recyclable and non-recyclable waste. This will make it easier to sort your waste and ensure that recyclables are properly processed.
-      3. Clean Your Recyclables: Rinse out any food or liquid containers before recycling them. Contaminated recyclables can spoil the entire batch and make it unusable.
-      4. Check Local Guidelines: Recycling programs can vary by location, so check your local recycling guidelines to ensure you're following the correct procedures.
-      5. Reduce and Reuse: In addition to recycling, try to reduce your waste by using reusable items like cloth bags, water bottles, and coffee cups.
-      6. Stay Informed: Stay updated on recycling practices and guidelines in your area. Join local recycling programs or follow environmental organizations to learn more about sustainable living.
-
-      By following these tips, you can make a positive impact on the environment and contribute to a more sustainable future.
-    `,
-  },
-];
+import axios from "axios";
 
 const statistics = [
   {
@@ -115,6 +64,8 @@ const LearnScreen = () => {
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const [collectionItems, setCollectionItems] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -138,24 +89,48 @@ const LearnScreen = () => {
     return () => clearInterval(intervalId);
   }, [fadeAnim]);
 
-  useEffect(() => {
-    const fetchCollectionItems = async () => {
-      try {
-        const response = await axios.get(
-          "https://kitacycle-backend.onrender.com/getItem"
-        );
-        setCollectionItems(response.data);
-      } catch (error) {
-        console.error("Error fetching collection items:", error);
-      }
-    };
+  const fetchCollectionItems = async () => {
+    try {
+      const response = await axios.get(
+        "https://kitacycle-backend.onrender.com/getItem"
+      );
+      setCollectionItems(response.data);
+    } catch (error) {
+      console.error("Error fetching collection items:", error);
+    }
+  };
 
+  const fetchArticles = async () => {
+    try {
+      const response = await axios.get(
+        "https://kitacycle-backend.onrender.com/articles"
+      );
+      setArticles(response.data.articles);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchCollectionItems();
+    fetchArticles();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchCollectionItems();
+    await fetchArticles();
+    setRefreshing(false);
+  };
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.waveContainer}>
           <WaveAnimation style={styles.wave} />
         </View>
@@ -216,7 +191,7 @@ const LearnScreen = () => {
                   <Text style={styles.articleTitle}>{item.title}</Text>
                 </TouchableOpacity>
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item._id}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.articleList}
@@ -233,6 +208,7 @@ const LearnScreen = () => {
                     style={styles.collectionImage}
                   />
                   <Text style={styles.collectionText}>{item.name}</Text>
+                  <Text style={styles.collectionText}>RM{item.price}/kg</Text>
                 </View>
               ))}
             </View>
@@ -328,7 +304,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: Colors.secondary,
-
     borderRadius: 12,
     padding: 15,
     height: 100,

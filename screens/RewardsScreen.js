@@ -64,7 +64,7 @@ const RewardsScreen = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://172.20.10.14:8000/${user._id}/getUserRewards`
+        `https://kitacycle-backend.onrender.com/${user._id}/getUserRewards`
       );
       setMyRewards(response.data.rewards);
     } catch (error) {
@@ -92,7 +92,7 @@ const RewardsScreen = () => {
 
     try {
       const response = await axios.post(
-        "http://172.20.10.14:8000/rewards/redeemReward",
+        "https://kitacycle-backend.onrender.com/rewards/redeemReward",
         {
           userId: user._id,
           rewardId: selectedReward._id,
@@ -302,7 +302,7 @@ const MyRewardsScreen = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://172.20.10.14:8000/${user._id}/getUserRewards`
+        `https://kitacycle-backend.onrender.com/${user._id}/getUserRewards`
       );
       setMyRewards(response.data.rewards);
     } catch (error) {
