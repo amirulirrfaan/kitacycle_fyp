@@ -4,9 +4,7 @@ import { View, ActivityIndicator } from "react-native";
 
 // Import screens and navigation components
 import Tabs from "./tabs";
-import CustomerDashboardScreen from "../screens/CustomerDashboardScreen";
 import SuccessScheduleScreen from "../screens/SuccessScheduleScreen";
-import ScheduleScreen from "../screens/ScheduleScreen";
 import RecycleCenterLocatorScreen from "../screens/RecycleCenterLocatorScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -24,6 +22,8 @@ import HowToRecycleProperly from "../screens/HowToRecycleProperly";
 import RecyclingQuiz from "../screens/RecyclingQuiz";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import ChangePasswordScreen from "../screens/ChangePasswordScreen";
+import RecyclingGuideScreen from "../screens/RecyclingGuideScreen";
+import ArticleScreen from "../screens/ArticleScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,7 +38,13 @@ const AuthStack = () => (
 );
 
 const AppStack = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerTitleStyle: {
+        fontSize: 18,
+      },
+    }}
+  >
     <Stack.Screen
       name="Tabs"
       component={Tabs}
@@ -57,7 +63,9 @@ const AppStack = () => (
       name="CollectorTracking"
       component={CollectorTrackingScreen}
     />
-    <Stack.Screen name="HowToRecycle" component={HowToRecycleProperly} />
+    <Stack.Screen name="RecyclingGuide" component={RecyclingGuideScreen} />
+    <Stack.Screen name="Article" component={ArticleScreen} />
+
     <Stack.Screen name="Quiz" component={RecyclingQuiz} />
     <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />

@@ -10,17 +10,21 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Dimensions,
+  FlatList,
 } from "react-native";
 import BalanceCard from "../components/Dashboard/BalanceCard";
 import NotificationModal from "../components/Dashboard/NotificationModal";
 import Colors from "../constants/Colors";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { useLogin } from "../context/LoginProvider";
 import useSocket from "../hooks/useSocket";
-import { fetchUserData } from "../api/api";
+import { fetchUserData, fetchLeaderboardData } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import WaveAnimation from "../components/WaveAnimation";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 function CustomerDashboardScreen() {
   const navigation = useNavigation();
@@ -28,6 +32,7 @@ function CustomerDashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
 
   const socket = useSocket();
 
@@ -35,6 +40,7 @@ function CustomerDashboardScreen() {
     const initialize = async () => {
       try {
         await fetchUserData();
+        await fetchLeaderboard();
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -43,6 +49,15 @@ function CustomerDashboardScreen() {
     };
     initialize();
   }, []);
+
+  const fetchLeaderboard = async () => {
+    try {
+      const leaderboardData = await fetchLeaderboardData();
+      setLeaderboard(leaderboardData);
+    } catch (error) {
+      console.error("Error fetching leaderboard data:", error);
+    }
+  };
 
   useEffect(() => {
     if (user && socket) {
@@ -83,14 +98,14 @@ function CustomerDashboardScreen() {
       const token = await AsyncStorage.getItem("token");
       if (token) {
         const userData = await fetchUserData(token);
-        console.log("User data:", userData);
         setUser(userData);
       } else {
         console.error("No token found");
       }
+      await fetchLeaderboard();
     } catch (error) {
-      console.error("Error refreshing user data:", error);
-      Alert.alert("Error", "Failed to refresh user data");
+      console.error("Error refreshing data:", error);
+      Alert.alert("Error", "Failed to refresh data");
     } finally {
       setRefreshing(false);
     }
@@ -101,7 +116,7 @@ function CustomerDashboardScreen() {
   }
 
   if (!user) {
-    return null; // Optionally render a placeholder or nothing
+    return null;
   }
 
   return (
@@ -111,12 +126,11 @@ function CustomerDashboardScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <LinearGradient
-        colors={[Colors.gradientOne, Colors.gradientTwo]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0.5 }}
-      />
+      <View style={styles.header}>
+        <View style={styles.waveHeader}></View>
+        <WaveAnimation style={styles.wave} />
+      </View>
+
       <View style={styles.container}>
         <View style={styles.greetingContainer}>
           <TouchableOpacity
@@ -148,6 +162,19 @@ function CustomerDashboardScreen() {
           />
         </View>
         <Guide />
+
+        {/* Leaderboard Section */}
+        <View style={styles.leaderboardSection}>
+          <Text style={styles.leaderboardTitle}>Leaderboard</Text>
+          {leaderboard.map((entry) => (
+            <View key={entry._id} style={styles.leaderboardCard}>
+              <Text style={styles.leaderboardName}>{entry.name}</Text>
+              <Text style={styles.leaderboardPoints}>
+                {entry.points} points
+              </Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       <NotificationModal notification={notification} closeModal={closeModal} />
@@ -209,13 +236,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    height: 200,
-    position: "absolute",
-    width: "100%",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    justifyContent: "flex-end",
+    height: 100,
     backgroundColor: Colors.primary,
+    position: "absolute",
+  },
+  waveHeader: {
+    height: "30%",
+    backgroundColor: Colors.primary,
+  },
+  wave: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    transform: [{ translateY: -30 }],
+    borderWidth: 2,
   },
   notificationIcon: {
     position: "absolute",
@@ -321,6 +355,39 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  leaderboardSection: {
+    marginTop: 20,
+    width: "100%",
+  },
+  leaderboardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  leaderboardCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  leaderboardName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#444",
+  },
+  leaderboardPoints: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: Colors.primary,
   },
 });
 

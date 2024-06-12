@@ -21,3 +21,12 @@ export const fetchUserData = async (token) => {
     throw new Error("Failed to fetch user data.");
   }
 };
+
+export const fetchLeaderboardData = async () => {
+  try {
+    const response = await axios.get("http://172.20.10.14:8000/leaderboard");
+    return response.data;
+  } catch (error) {
+    throw new Error("Error fetching leaderboard data");
+  }
+};

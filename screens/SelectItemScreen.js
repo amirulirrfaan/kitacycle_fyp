@@ -54,9 +54,7 @@ const SelectItemScreen = ({ setSelectedItems }) => {
           style={styles.weightInput}
           keyboardType="numeric"
           value={item.weight.toString()}
-          onChangeText={(text) =>
-            handleWeightChange(item._id, parseFloat(text))
-          }
+          onChangeText={(text) => handleWeightChange(item._id, text)}
         />
         <TouchableOpacity
           onPress={() => handleWeightChange(item._id, item.weight + 1)}
@@ -71,7 +69,7 @@ const SelectItemScreen = ({ setSelectedItems }) => {
   const handleWeightChange = (itemId, newWeight) => {
     const updatedItems = items.map((item) =>
       item._id === itemId
-        ? { ...item, weight: newWeight < 0 ? 0 : newWeight }
+        ? { ...item, weight: newWeight === "" ? 0 : parseFloat(newWeight) }
         : item
     );
     setItems(updatedItems);

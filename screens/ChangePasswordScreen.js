@@ -9,10 +9,26 @@ const ChangePasswordScreen = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
 
   const handleChangePassword = async () => {
+    // Validate inputs
+    const validationErrors = {};
+    if (!currentPassword) {
+      validationErrors.currentPassword = "Current password is required";
+    }
+    if (!newPassword) {
+      validationErrors.newPassword = "New password is required";
+    } else if (newPassword.length < 6) {
+      validationErrors.newPassword =
+        "New password must be at least 6 characters long";
+    }
     if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "New passwords do not match");
+      validationErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -45,6 +61,9 @@ const ChangePasswordScreen = () => {
         placeholder="Current Password"
         secureTextEntry
       />
+      {errors.currentPassword && (
+        <Text style={styles.errorText}>{errors.currentPassword}</Text>
+      )}
       <TextInput
         style={styles.input}
         value={newPassword}
@@ -52,6 +71,9 @@ const ChangePasswordScreen = () => {
         placeholder="New Password"
         secureTextEntry
       />
+      {errors.newPassword && (
+        <Text style={styles.errorText}>{errors.newPassword}</Text>
+      )}
       <TextInput
         style={styles.input}
         value={confirmPassword}
@@ -59,6 +81,9 @@ const ChangePasswordScreen = () => {
         placeholder="Confirm New Password"
         secureTextEntry
       />
+      {errors.confirmPassword && (
+        <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+      )}
       <Button
         title="Change Password"
         onPress={handleChangePassword}
@@ -85,7 +110,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingLeft: 10,
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
   },
 });
 

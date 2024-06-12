@@ -45,7 +45,7 @@ const LoginProvider = ({ children }) => {
         setUser(data.user);
         setIsLoggedIn(true);
       } else {
-        throw new Error("Invalid token or user data");
+        throw new Error("Invalid token or user datas");
       }
     } catch (error) {
       const errorMessage = error.message;

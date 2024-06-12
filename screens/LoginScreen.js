@@ -17,6 +17,8 @@ function LoginScreen({ navigation }) {
   const { login, loading } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const validateInputs = () => {
     if (!email && !password) {
@@ -54,19 +56,29 @@ function LoginScreen({ navigation }) {
         />
         <Text style={styles.title}>Login</Text>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            isEmailFocused && { borderColor: Colors.primary },
+          ]}
           placeholder="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
           autoCapitalize="none"
+          onFocus={() => setIsEmailFocused(true)}
+          onBlur={() => setIsEmailFocused(false)}
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            isPasswordFocused && { borderColor: Colors.primary },
+          ]}
           placeholder="Password"
           value={password}
           onChangeText={(text) => setPassword(text)}
           autoCapitalize="none"
           secureTextEntry
+          onFocus={() => setIsPasswordFocused(true)}
+          onBlur={() => setIsPasswordFocused(false)}
         />
         <TouchableOpacity>
           <Text

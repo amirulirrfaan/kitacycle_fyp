@@ -34,16 +34,14 @@ export default function App() {
   return (
     <StripeProvider publishableKey="pk_test_51PJfG705yUtdB5DnlLVAk3FiHnr049jde10ZPpHedZkW0HSwTA4uqAIzD5mjwzHmw9ZuBEePTKUDOgOCJsUuwlfO00vU3ZpyKN">
       <LoginProvider>
-        <SafeAreaProvider>
-          <SafeAreaView style={styles.safeArea}>
-            <GestureHandlerRootView>
-              <NavigationContainer>
-                <InitializeLoginStatus />
-                <MainNavigator />
-              </NavigationContainer>
-            </GestureHandlerRootView>
-          </SafeAreaView>
-        </SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <GestureHandlerRootView>
+            <NavigationContainer>
+              <InitializeLoginStatus />
+              <MainNavigator />
+            </NavigationContainer>
+          </GestureHandlerRootView>
+        </SafeAreaView>
       </LoginProvider>
     </StripeProvider>
   );
